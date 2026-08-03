@@ -1,0 +1,1 @@
+This directory contains the dummy OTA netlist files. Due to PDK NDA restrictions, we can't upload the netlist along with the tech specific device parameters and model files. Please update these testbenches with your choice of technology.
