@@ -1,3 +1,8 @@
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE) [![docs](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://umn-eda.github.io/NEMESIS/)
+
+
+
+
 # NEMESIS
 
 <p>
