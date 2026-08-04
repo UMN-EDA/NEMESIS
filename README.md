@@ -111,5 +111,5 @@ COmPOSER has been accepted for publication in the Proceedings of the ACM/IEEE De
 }
 ```
 
-Paper link: [[https://arxiv.org/abs/2603.20486](https://arxiv.org/abs/2603.20486)](https://arxiv.org/abs/2607.05657)
+Paper link: [[https://arxiv.org/abs/2603.20486](https://arxiv.org/abs/2603.20486)]
 
