@@ -85,4 +85,31 @@ Open `docs/index.html` locally or enable GitHub Pages from `/docs`. The site exp
 
 ## License
 
-License information has not been added to this repository yet.
+This repository is distributed under the license in [`LICENSE`](LICENSE).
+
+## Contact
+
+For any questions, please contact:
+
+**Subhadip Ghosh**  
+University of Minnesota  
+ghosh211@umn.edu
+
+## Citation
+
+COmPOSER has been accepted for publication in the Proceedings of the ACM/IEEE Design Automation Conference (DAC) 2026. If you use COmPOSER in your research, please cite our work:
+
+```bibtex
+@misc{ghosh2026nemesisnetlistdrivenmodelingequation,
+      title={NEMESIS: NEtlist-Driven Modeling and Equation Synthesis with Inversion-Aware SPICE Anchoring}, 
+      author={Subhadip Ghosh and Ramesh Harjani and Sachin S. Sapatnekar},
+      year={2026},
+      eprint={2607.05657},
+      archivePrefix={arXiv},
+      primaryClass={cs.AR},
+      url={https://arxiv.org/abs/2607.05657}, 
+}
+```
+
+Paper link: [[https://arxiv.org/abs/2603.20486](https://arxiv.org/abs/2603.20486)](https://arxiv.org/abs/2607.05657)
+
