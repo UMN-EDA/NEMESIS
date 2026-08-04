@@ -14,7 +14,7 @@ This directory is a preserved, successful NEMESIS run for the five-transistor OT
 - Final SPICE report: `spice_performance/spice_estimation_stage9.json`.
 - Final operating-point-based model report: `ota_model_performance/ota_model_estimation_stage9.2.json`.
 
-The stage-9 comparison is close on the main measured quantities. For example, the model reports 19.93 dB DC gain and 20.45 MHz UGB, while HSPICE reports 20.23 dB and 20.14 MHz, respectively. `Gain Margin (dB)` is recorded as `FAILED` in the SPICE report, so it must not be interpreted as a validated numeric result.
+The stage-9 comparison is close on the valid measured quantities. For example, the model reports 19.93 dB DC gain and 20.45 MHz UGB, while HSPICE reports 20.23 dB and 20.14 MHz, respectively.
 
 ## Artifact flow
 

@@ -661,6 +661,313 @@ pre code {
   max-width: 1000px;
 }
 
+/* The worked example is documentation first: keep lines short, sections distinct,
+   and related artifacts together instead of filling every available column. */
+.skip-link {
+  background: #ffffff;
+  border-radius: 0 0 6px 0;
+  color: var(--accent-dark);
+  font-weight: 800;
+  left: 0;
+  padding: 0.7rem 1rem;
+  position: fixed;
+  top: -5rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.example-page {
+  background: #f4f7f8;
+  font-size: 1rem;
+}
+
+.example-page .topbar,
+.example-page .example-hero,
+.example-page .section > * {
+  margin-left: auto;
+  margin-right: auto;
+  width: min(100%, 1180px);
+}
+
+.example-page .topbar {
+  max-width: none;
+  width: 100%;
+}
+
+.example-page .example-hero {
+  align-items: center;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+  padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.example-page .example-hero h1 {
+  font-size: clamp(3rem, 6vw, 5.8rem);
+  line-height: 1.02;
+}
+
+.example-page .lead {
+  line-height: 1.65;
+  max-width: 690px;
+}
+
+.example-page .example-stats {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.example-page .example-stats div {
+  min-height: 118px;
+  padding: 1.4rem;
+}
+
+.example-page .example-stats strong {
+  font-size: 2.35rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.example-page .section {
+  padding-bottom: clamp(5rem, 8vw, 7.5rem);
+  padding-top: clamp(5rem, 8vw, 7.5rem);
+}
+
+.example-page .section-heading {
+  margin-bottom: 3rem;
+  max-width: 790px;
+}
+
+.example-page .section-heading h2 {
+  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  line-height: 1.08;
+}
+
+.example-page .section-heading p:not(.eyebrow) {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  margin-top: 1.15rem;
+  max-width: 720px;
+}
+
+.example-page .run-pipeline {
+  counter-reset: run-step;
+  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.example-page .run-pipeline article {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  counter-increment: run-step;
+  padding: 2rem 2.25rem 2rem 4.75rem;
+  position: relative;
+}
+
+.example-page .run-pipeline article:nth-child(odd) {
+  border-right: 1px solid var(--line);
+}
+
+.example-page .run-pipeline article::before {
+  align-items: center;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  color: var(--accent-dark);
+  content: counter(run-step, decimal-leading-zero);
+  display: flex;
+  font-size: 0.78rem;
+  font-weight: 900;
+  height: 2.25rem;
+  justify-content: center;
+  left: 1.25rem;
+  position: absolute;
+  top: 1.8rem;
+  width: 2.25rem;
+}
+
+.example-page .run-pipeline article > span {
+  display: none;
+}
+
+.example-page .run-pipeline h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.65rem;
+}
+
+.example-page .run-pipeline p,
+.example-page .artifact-grid p {
+  line-height: 1.7;
+}
+
+.example-page .artifact-grid {
+  gap: 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.example-page .artifact-grid article {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 245px;
+  padding: 1.75rem;
+}
+
+.example-page .artifact-grid article > code {
+  align-self: flex-start;
+}
+
+.example-page .artifact-grid h3 {
+  font-size: 1.3rem;
+}
+
+.example-page .artifact-grid a {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  text-underline-offset: 0.2em;
+}
+
+.example-page .stage-reader {
+  background: transparent;
+  border: 0;
+  counter-reset: read-step;
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin-bottom: 3rem;
+  max-width: 920px;
+  padding: 0;
+}
+
+.example-page .stage-reader li {
+  border-bottom: 1px solid var(--line);
+  counter-increment: read-step;
+  line-height: 1.75;
+  margin: 0;
+  padding: 1.4rem 1rem 1.4rem 4rem;
+  position: relative;
+}
+
+.example-page .stage-reader li::before {
+  color: var(--accent);
+  content: counter(read-step, decimal-leading-zero);
+  font-size: 0.82rem;
+  font-weight: 900;
+  left: 1rem;
+  letter-spacing: 0.08em;
+  position: absolute;
+  top: 1.55rem;
+}
+
+.example-page .result-panel {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  gap: 2rem;
+  max-width: 1000px;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.example-page .result-panel > div:first-child {
+  max-width: 690px;
+}
+
+.example-page .result-panel h3 {
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  margin-bottom: 0.75rem;
+}
+
+.example-page .comparison-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.example-page .error-table {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 0.7fr repeat(3, 1fr);
+  max-width: 920px;
+  overflow-x: auto;
+}
+
+.example-page .error-table > div {
+  border-bottom: 1px solid var(--line);
+  min-width: 150px;
+  padding: 0.85rem 1rem;
+}
+
+.example-page .error-table > div:nth-last-child(-n + 4) {
+  border-bottom: 0;
+}
+
+.example-page .error-table .table-head {
+  background: #eaf1f3;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.example-page .error-table > div:nth-child(4n + 1),
+.example-page .error-table .converged-row {
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.example-page .error-table .converged-row {
+  background: var(--accent-soft);
+}
+
+.example-page .error-plot {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-top: 2rem;
+  max-width: 1000px;
+}
+
+.example-page .error-plot img {
+  aspect-ratio: auto;
+  background: #ffffff;
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.example-page .error-plot figcaption {
+  line-height: 1.65;
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.example-page .comparison-table > div {
+  padding: 0.9rem 1rem;
+}
+
+.example-page .comparison-table > div:not(.table-head):nth-child(4n + 1) {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.example-page .callout {
+  border-radius: 0 6px 6px 0;
+  line-height: 1.7;
+}
+
+.example-page #reproduce .command-block,
+.example-page #reproduce .section-note {
+  max-width: 920px;
+}
+
+.example-page #reproduce .command-block {
+  border-radius: 10px;
+}
+
+.example-page #reproduce pre {
+  line-height: 1.75;
+  padding: 1.6rem;
+}
+
 @media (max-width: 980px) {
   .hero,
   .example-hero,
@@ -675,6 +982,19 @@ pre code {
 
   .gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .example-page .run-pipeline,
+  .example-page .artifact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .example-page .run-pipeline article:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .example-page .artifact-grid article {
+    min-height: 0;
   }
 }
 
@@ -747,5 +1067,28 @@ pre code {
   .contact-card {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .example-page .example-hero {
+    padding-left: 5vw;
+    padding-right: 5vw;
+  }
+
+  .example-page .example-stats div {
+    min-height: 102px;
+    padding: 1rem;
+  }
+
+  .example-page .run-pipeline article {
+    padding: 1.6rem 1rem 1.6rem 4.2rem;
+  }
+
+  .example-page .run-pipeline article::before {
+    left: 0.85rem;
+    top: 1.45rem;
+  }
+
+  .example-page .result-panel {
+    padding: 1.25rem;
   }
 }
