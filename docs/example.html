@@ -17,8 +17,8 @@
           <a href="index.html">Framework</a>
           <a href="#story">Method</a>
           <a href="#artifacts">Artifacts</a>
-          <a href="#errors">Errors</a>
-          <a href="#stages">Stage Data</a>
+          <a href="#errors">Iterations</a>
+          <a href="#stages">Final result</a>
           <a href="#reproduce">Reproduce</a>
         </div>
       </nav>
@@ -28,7 +28,7 @@
           <h1>5T OTA model refinement</h1>
           <p class="lead">This example documents nine iterations of analytical model refinement for a five-transistor OTA. Model predictions are compared with HSPICE measurements at each iteration, and the converged scalar model is converted to a vectorized evaluator.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#errors">View error results</a>
+            <a class="button primary" href="#errors">Follow the iterations</a>
             <a class="button secondary" href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run">View archived files</a>
           </div>
         </div>
@@ -53,7 +53,7 @@
           <article><span>02</span><h3>Generate analytical equations</h3><p>Each iteration produces a structured set of performance equations. The equations are recorded and compiled into an executable Python model.</p></article>
           <article><span>03</span><h3>Perform LUT-based sizing</h3><p>The scalar model and gm/Id lookup table generate device dimensions and the iteration's <code>.1</code> prediction report.</p></article>
           <article><span>04</span><h3>Run HSPICE characterization</h3><p>The selected device parameters are applied to the testbenches. Extracted measurements are stored in the corresponding HSPICE report.</p></article>
-          <article><span>05</span><h3>Evaluate with operating points</h3><p>HSPICE operating-point parameters are supplied to the analytical equations to generate the <code>.2</code> prediction report.</p></article>
+          <article><span>05</span><h3>Evaluate with operating points</h3><p>HSPICE operating-point parameters are supplied to the analytical equations to produce the model values used in the comparison.</p></article>
           <article><span>06</span><h3>Calculate relative error</h3><p>Model predictions are compared with HSPICE measurements. Equations exceeding the tolerance are revised in the next iteration; iteration 9 meets the convergence criterion.</p></article>
         </div>
       </section>
@@ -70,8 +70,8 @@
           <article><code>prompts/</code><h3>Iteration inputs</h3><p>The gm/Id, initial-equation, error-correction, and vectorization instructions. The iteration N prompt produces the iteration N response.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/prompts">Directory guide</a></article>
           <article><code>llm_outputs/</code><h3>Generated equations</h3><p>Nine structured responses plus the iteration-9 vectorization response; these compile into executable models.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/llm_outputs">Directory guide</a></article>
           <article><code>ota_models/</code><h3>Executable equations</h3><p>Nine scalar candidates and the final vectorized evaluator. Earlier stages remain useful for auditing.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_models">Directory guide</a></article>
-          <article><code>ota_model_performance/</code><h3>Model predictions</h3><p>Two reports per stage: <code>.1</code> for LUT sizing and <code>.2</code> for operating-point verification.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_model_performance">Directory guide</a></article>
-          <article><code>spice_performance/</code><h3>HSPICE reference measurements</h3><p>Nine HSPICE characterization summaries compared with the corresponding model <code>.2</code> reports.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/spice_performance">Directory guide</a></article>
+          <article><code>ota_model_performance/</code><h3>Model predictions</h3><p>The model values produced during sizing and operating-point verification.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_model_performance">Directory guide</a></article>
+          <article><code>spice_performance/</code><h3>HSPICE reference measurements</h3><p>Nine HSPICE characterization summaries used for the Model vs HSPICE comparison.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/spice_performance">Directory guide</a></article>
           <article><code>testbenches/</code><h3>Simulation boundary</h3><p>The full DUT, universal measurement decks, baseline and updated parameters, wrapper, and run workspace.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/testbenches">Directory guide</a></article>
           <article><code>__pycache__/</code><h3>Disposable cache</h3><p>Python bytecode only. It affects import speed, not equations, sizing, simulation, or convergence.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_models/__pycache__">Directory guide</a></article>
         </div>
@@ -79,21 +79,38 @@
 
       <section class="section" id="errors">
         <div class="section-heading">
-          <p class="eyebrow">Error by iteration</p>
-          <h2>Model error decreases across nine refinement iterations</h2>
-          <p>For each applicable metric, relative error is calculated as <code>|model − HSPICE| / |HSPICE| × 100%</code>. The mean and maximum below are calculated across 13 OTA metrics. “Above 5%” is the number of metrics that exceed the convergence threshold.</p>
+          <p class="eyebrow">Iteration by iteration</p>
+          <h2>What passed, what failed, and what was corrected</h2>
+          <p>Each iteration compares the analytical model with HSPICE. A spec is marked correct when its relative error is 5% or less. The next iteration focuses on the specs that remain above that limit.</p>
         </div>
-        <div class="error-table" role="table" aria-label="Model error by refinement iteration">
-          <div class="table-head">Iteration</div><div class="table-head">Mean absolute error</div><div class="table-head">Maximum error</div><div class="table-head">Metrics above 5%</div>
-          <div>1</div><div>25.61%</div><div>141.34%</div><div>8 of 13</div>
-          <div>2</div><div>14.81%</div><div>101.30%</div><div>6 of 13</div>
-          <div>3</div><div>8.61%</div><div>32.90%</div><div>6 of 13</div>
-          <div>4</div><div>5.68%</div><div>21.89%</div><div>5 of 13</div>
-          <div>5</div><div>9.01%</div><div>57.62%</div><div>4 of 13</div>
-          <div>6</div><div>4.97%</div><div>17.73%</div><div>3 of 13</div>
-          <div>7</div><div>6.18%</div><div>44.70%</div><div>2 of 13</div>
-          <div>8</div><div>4.23%</div><div>21.89%</div><div>1 of 13</div>
-          <div class="converged-row">9</div><div class="converged-row">2.60%</div><div class="converged-row">4.85%</div><div class="converged-row">0 of 13</div>
+        <div class="iteration-list">
+          <article>
+            <div class="iteration-number">01</div><div><h3>Initial model</h3><p class="pass"><strong>Correct (5):</strong> DC gain, bandwidth, UGB, phase margin, ICMR max.</p><p class="fail"><strong>Needs work (8):</strong> ICMR min, both output swings, both slew rates, PSRR+, PSRR−, CMRR.</p><p class="iteration-note">Largest error: output swing min, 141.3%. The next model corrects output swing and the large CMRR/slew mismatches.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">02</div><div><h3>Output swing correction</h3><p class="pass"><strong>Correct (7):</strong> DC gain, bandwidth, UGB, phase margin, ICMR max, output swing min, PSRR−.</p><p class="fail"><strong>Needs work (6):</strong> ICMR min, output swing max, both slew rates, PSRR+, CMRR.</p><p class="iteration-note">Output swing min is fixed. Negative slew is now the largest error at 101.3%, so slew modeling becomes the main target.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">03</div><div><h3>Slew-rate refinement</h3><p class="pass"><strong>Correct (7):</strong> DC gain, bandwidth, UGB, phase margin, ICMR max, output swing min, PSRR−.</p><p class="fail"><strong>Needs work (6):</strong> ICMR min, output swing max, both slew rates, PSRR+, CMRR.</p><p class="iteration-note">Negative-slew error falls from 101.3% to 32.9%, but the same six specs still miss the limit.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">04</div><div><h3>Negative slew converges</h3><p class="pass"><strong>Correct (8):</strong> DC gain, bandwidth, UGB, phase margin, ICMR max, output swing min, negative slew, PSRR−.</p><p class="fail"><strong>Needs work (5):</strong> ICMR min, output swing max, positive slew, PSRR+, CMRR.</p><p class="iteration-note">Negative slew passes. Positive slew is the largest remaining error at 21.9%.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">05</div><div><h3>ICMR min converges; CMRR regresses</h3><p class="pass"><strong>Correct (9):</strong> DC gain, bandwidth, UGB, phase margin, both ICMR limits, output swing min, negative slew, PSRR−.</p><p class="fail"><strong>Needs work (4):</strong> output swing max, positive slew, PSRR+, CMRR.</p><p class="iteration-note">ICMR min passes, but the CMRR change overshoots to 57.6% error. The next iteration repairs CMRR without losing the nine correct specs.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">06</div><div><h3>CMRR recovery</h3><p class="pass"><strong>Correct (10):</strong> DC gain, bandwidth, UGB, phase margin, both ICMR limits, output swing min, negative slew, PSRR+, PSRR−.</p><p class="fail"><strong>Needs work (3):</strong> output swing max, positive slew, CMRR.</p><p class="iteration-note">CMRR error drops to 10.4% and PSRR+ passes. Positive slew remains worst at 17.7%.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">07</div><div><h3>Output swing max converges</h3><p class="pass"><strong>Correct (11):</strong> all specs except positive slew and CMRR.</p><p class="fail"><strong>Needs work (2):</strong> positive slew and CMRR.</p><p class="iteration-note">Output swing max passes. CMRR is close at 5.6%, while positive slew regresses to 44.7%.</p></div>
+          </article>
+          <article>
+            <div class="iteration-number">08</div><div><h3>Only positive slew remains</h3><p class="pass"><strong>Correct (12):</strong> all specs except positive slew.</p><p class="fail"><strong>Needs work (1):</strong> positive slew, 21.9% error.</p><p class="iteration-note">CMRR now passes. The final refinement is isolated to the positive-slew equation.</p></div>
+          </article>
+          <article class="converged-iteration">
+            <div class="iteration-number">09</div><div><h3>Converged</h3><p class="pass"><strong>Correct (13 of 13):</strong> DC gain, bandwidth, UGB, phase margin, both ICMR limits, both output swings, both slew rates, PSRR+, PSRR−, and CMRR.</p><p class="fail"><strong>Needs work:</strong> none.</p><p class="iteration-note">The largest remaining difference is only 4.9% (3 dB bandwidth), below the 5% limit. The scalar model is accepted and vectorized.</p></div>
+          </article>
         </div>
         <figure class="error-plot">
           <a href="../plots/combined_subplots.png"><img src="../plots/combined_subplots.png" alt="Line plot of absolute relative error for thirteen OTA performance metrics over nine model-refinement iterations"></a>
@@ -103,27 +120,18 @@
 
       <section class="section" id="stages">
         <div class="section-heading">
-          <p class="eyebrow">Iteration data</p>
-          <h2>Inspect the files for a single iteration</h2>
-          <p>Use the same iteration number across directories to identify the equations, model predictions, HSPICE measurements, and error-correction input.</p>
+          <p class="eyebrow">Final result</p>
+          <h2>Model vs HSPICE at convergence</h2>
+          <p>Iteration 9 brings every modeled spec within the 5% error limit. The compact comparison below shows representative results.</p>
         </div>
-        <ol class="stage-reader">
-          <li><strong>Prompt:</strong> open <code>prompts/prompt_stageN.txt</code> to see the information given to the model.</li>
-          <li><strong>Proposal:</strong> inspect <code>llm_outputs/llm_output_stageN.json</code> for topology mapping and equations.</li>
-          <li><strong>Executable model:</strong> read <code>ota_models/ota_model_stageN.py</code>, compiled from that JSON.</li>
-          <li><strong>LUT sizing:</strong> inspect <code>ota_model_performance/ota_model_estimation_stageN.1.json</code> and the parameters it selected.</li>
-          <li><strong>HSPICE measurements:</strong> compare <code>spice_performance/spice_estimation_stageN.json</code> with the same row in <code>design_sweep_log.csv</code>.</li>
-          <li><strong>Equation verification:</strong> compare the SPICE report with <code>ota_model_estimation_stageN.2.json</code>; mismatch appears in the next prompt.</li>
-        </ol>
-
         <div class="result-panel">
           <div>
             <p class="eyebrow">Iteration 9 comparison</p>
-            <h3>Final analytical-model predictions and HSPICE measurements</h3>
-            <p>The table is illustrative, not a replacement for the JSON reports. Percent differences use the HSPICE magnitude as the reference.</p>
+            <h3>Final analytical model and simulator measurements</h3>
+            <p>Percent differences use the HSPICE magnitude as the reference.</p>
           </div>
           <div class="comparison-table" role="table" aria-label="Stage 9 model and HSPICE comparison">
-            <div class="table-head">Metric</div><div class="table-head">Model .2</div><div class="table-head">HSPICE</div><div class="table-head">Difference</div>
+            <div class="table-head">Metric</div><div class="table-head">Model</div><div class="table-head">HSPICE</div><div class="table-head">Difference</div>
             <div>DC gain</div><div>19.930 dB</div><div>20.226 dB</div><div>1.46%</div>
             <div>UGB</div><div>20.452 MHz</div><div>20.144 MHz</div><div>1.53%</div>
             <div>Phase margin</div><div>95.439°</div><div>95.433°</div><div>0.01%</div>
