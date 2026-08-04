@@ -17,6 +17,7 @@ The GitHub Pages documentation site is in `docs/`. After pushing the repository,
 - `Universal/testbenches/`: reusable HSPICE testbenches and the universal DUT wrapper.
 - `Specs/`: reference spec JSON files for supported examples.
 - `docs/`: website materials for GitHub Pages.
+- `5t_ota_example_run/`: preserved nine-stage example showing the complete artifact trail of a successful 5T OTA run.
 - `<WORK_DIR>/`: generated run directory, such as `5t_ota/`, containing prompts, LLM outputs, compiled models, sizing reports, SPICE reports, and logs.
 
 ## Requirements
@@ -55,6 +56,14 @@ bash llm_aided_modelling.sh
 ```
 
 Important: the driver deletes and recreates `WORK_DIR` at the start of each run. Preserve generated artifacts before rerunning with the same work-directory name.
+
+## Worked 5T OTA Example
+
+[`5t_ota_example_run/`](5t_ota_example_run/) is a read-only snapshot of a complete framework run. It is named differently from the driver's default `5t_ota` workspace so it can be published without being deleted by the next run. The example converged at stage 9 and preserves the full chain from simplified netlist and generated specification to prompts, structured LLM responses, compiled models, model estimates, HSPICE reports, and the final vectorized evaluator.
+
+Start with [`5t_ota_example_run/README.md`](5t_ota_example_run/README.md) for the artifact flow and directory map. Every subdirectory also has a short README explaining its contents, its producer and consumer, and its effect on convergence. For a visual walkthrough, open the website's [Example Run](docs/example.html) page.
+
+The final stage illustrates how to read the two model reports: `ota_model_estimation_stage9.1.json` is the LUT-based sizing pass, while `ota_model_estimation_stage9.2.json` is the same model evaluated using HSPICE-extracted operating points. The feedback manager compares the `.2` report against `spice_estimation_stage9.json`. The final scalar and vectorized evaluators are `ota_model_stage9.py` and `ota_model_stage9_vectorized.py`, respectively.
 
 ## What the Driver Produces
 
@@ -112,4 +121,3 @@ COmPOSER has been accepted for publication in the Proceedings of the ACM/IEEE De
 ```
 
 Paper link: [https://arxiv.org/abs/2607.05657]
-
