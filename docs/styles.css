@@ -892,6 +892,7 @@ pre code {
   grid-template-columns: 0.7fr repeat(3, 1fr);
   max-width: 920px;
   overflow-x: auto;
+  margin-bottom: 1.5rem;
 }
 
 .example-page .error-table > div {
@@ -956,14 +957,7 @@ pre code {
 }
 
 .example-page .iteration-evidence {
-  background: #f5f8f9;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  display: grid;
-  gap: 0.65rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 0 0 0.8rem;
-  padding: 0.75rem 0.9rem;
+  display: none;
 }
 
 .example-page .iteration-evidence span {

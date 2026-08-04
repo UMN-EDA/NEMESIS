@@ -81,7 +81,19 @@
         <div class="section-heading">
           <p class="eyebrow">Iteration by iteration</p>
           <h2>What passed, what failed, and what was corrected</h2>
-          <p>Each iteration compares the analytical model with HSPICE. A spec is marked correct when its relative error is 5% or less. The next iteration focuses on the specs that remain above that limit. Every card below reports a numerical summary. The complete values for iteration N are carried into <code>prompt_stage(N+1).txt</code> as feedback for the next correction; for example, Iteration 3's complete comparison is in <code>prompt_stage4.txt</code>.</p>
+          <p>Each iteration compares the analytical model with HSPICE. A spec is marked correct when its absolute relative error is 5% or less. “DC gain error” applies only to DC gain. The “largest overall error” is the greatest error among all 13 modeled specs; it may therefore belong to output swing, slew rate, CMRR, PSRR, bandwidth, or another metric. The complete values for iteration N are carried into <code>prompt_stage(N+1).txt</code> as feedback for the next correction; for example, Iteration 3's complete comparison is in <code>prompt_stage4.txt</code>.</p>
+        </div>
+        <div class="error-table" role="table" aria-label="Error summary by model-refinement iteration">
+          <div class="table-head">Iteration</div><div class="table-head">DC gain error</div><div class="table-head">Largest-error metric</div><div class="table-head">Largest overall error</div>
+          <div>1</div><div>1.46%</div><div>Output swing min</div><div>141.3%</div>
+          <div>2</div><div>1.46%</div><div>Negative slew rate</div><div>101.3%</div>
+          <div>3</div><div>1.46%</div><div>Negative slew rate</div><div>32.9%</div>
+          <div>4</div><div>1.46%</div><div>Positive slew rate</div><div>21.9%</div>
+          <div>5</div><div>1.46%</div><div>CMRR</div><div>57.6%</div>
+          <div>6</div><div>1.46%</div><div>Positive slew rate</div><div>17.7%</div>
+          <div>7</div><div>1.46%</div><div>Positive slew rate</div><div>44.7%</div>
+          <div>8</div><div>1.46%</div><div>Positive slew rate</div><div>21.9%</div>
+          <div class="converged-row">9</div><div class="converged-row">1.46%</div><div class="converged-row">3 dB bandwidth</div><div class="converged-row">4.9%</div>
         </div>
         <div class="iteration-list">
           <article>
@@ -113,7 +125,7 @@
           </article>
         </div>
         <figure class="error-plot">
-          <a href="../plots/combined_subplots.png"><img src="../plots/combined_subplots.png" alt="Line plot of absolute relative error for thirteen OTA performance metrics over nine model-refinement iterations"></a>
+          <a href="assets/combined_subplots.png"><img src="assets/combined_subplots.png" alt="Line plot of absolute relative error for thirteen OTA performance metrics over nine model-refinement iterations"></a>
           <figcaption>Absolute relative error for each valid performance metric. The dotted red line marks the 5% convergence threshold. Select the plot to open it at full resolution.</figcaption>
         </figure>
       </section>
@@ -122,7 +134,7 @@
         <div class="section-heading">
           <p class="eyebrow">Final result</p>
           <h2>Model vs HSPICE at convergence</h2>
-          <p>Iteration 9 brings every modeled spec within the 5% error limit. The compact comparison below shows representative results.</p>
+          <p>Iteration 9 brings all 13 modeled specs within the 5% error limit. The complete comparison is shown below.</p>
         </div>
         <div class="result-panel">
           <div>
@@ -135,8 +147,16 @@
             <div>DC gain</div><div>19.930 dB</div><div>20.226 dB</div><div>1.46%</div>
             <div>UGB</div><div>20.452 MHz</div><div>20.144 MHz</div><div>1.53%</div>
             <div>Phase margin</div><div>95.439°</div><div>95.433°</div><div>0.01%</div>
+            <div>ICMR min</div><div>0.433 V</div><div>0.421 V</div><div>2.86%</div>
+            <div>ICMR max</div><div>0.823 V</div><div>0.788 V</div><div>4.37%</div>
+            <div>Output swing min</div><div>0.077 V</div><div>0.080 V</div><div>3.73%</div>
+            <div>Output swing max</div><div>0.783 V</div><div>0.796 V</div><div>1.62%</div>
+            <div>Negative slew</div><div>11.035 V/µs</div><div>11.510 V/µs</div><div>4.12%</div>
             <div>CMRR</div><div>42.187 dB</div><div>43.546 dB</div><div>3.12%</div>
             <div>Positive slew</div><div>12.463 V/µs</div><div>12.374 V/µs</div><div>0.72%</div>
+            <div>PSRR+</div><div>19.755 dB</div><div>20.106 dB</div><div>1.75%</div>
+            <div>PSRR−</div><div>43.517 dB</div><div>45.193 dB</div><div>3.71%</div>
+            <div>3 dB bandwidth</div><div>2.062 MHz</div><div>1.966 MHz</div><div>4.85%</div>
           </div>
         </div>
       </section>
