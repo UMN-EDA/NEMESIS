@@ -884,24 +884,27 @@ pre code {
   border-radius: 8px;
 }
 
-.example-page .error-table {
-  background: var(--surface);
+.example-page .error-table-wrap {
   border: 1px solid var(--line);
   border-radius: 10px;
-  display: grid;
-  grid-template-columns: 0.7fr repeat(3, 1fr);
-  max-width: 920px;
-  overflow-x: auto;
   margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.example-page .error-table {
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: minmax(170px, 1.5fr) repeat(9, minmax(82px, 1fr));
+  min-width: 980px;
 }
 
 .example-page .error-table > div {
   border-bottom: 1px solid var(--line);
-  min-width: 150px;
-  padding: 0.85rem 1rem;
+  padding: 0.72rem 0.65rem;
+  text-align: center;
 }
 
-.example-page .error-table > div:nth-last-child(-n + 4) {
+.example-page .error-table > div:nth-last-child(-n + 10) {
   border-bottom: 0;
 }
 
@@ -911,14 +914,29 @@ pre code {
   font-weight: 800;
 }
 
-.example-page .error-table > div:nth-child(4n + 1),
-.example-page .error-table .converged-row {
+.example-page .error-table .metric-name {
   color: var(--ink);
+  font-weight: 750;
+  position: sticky;
+  left: 0;
+  text-align: left;
+  z-index: 1;
+}
+
+.example-page .error-table .metric-name:not(.table-head) {
+  background: var(--surface);
+}
+
+.example-page .error-table .metric-pass {
+  background: #e4f5e9;
+  color: #176b35;
   font-weight: 750;
 }
 
-.example-page .error-table .converged-row {
-  background: var(--accent-soft);
+.example-page .error-table .metric-fail {
+  background: #fde8e7;
+  color: #a32620;
+  font-weight: 750;
 }
 
 .example-page .iteration-list {
