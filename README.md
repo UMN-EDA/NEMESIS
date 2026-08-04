@@ -5,11 +5,6 @@
 
 # NEMESIS
 
-<p>
-  <a href="#license"><kbd>License</kbd></a>
-  <a href="docs/index.html"><kbd>WEBSITE</kbd></a>
-</p>
-
 NEMESIS is a framework for LLM-aided OTA circuit modeling with SPICE-based verification. The main driver, `llm_aided_modelling.sh`, generates compact performance equations, compiles them into executable Python models, sizes the circuit using gm/Id lookup-table logic, verifies the result with HSPICE, and feeds mismatch information back into the next LLM prompt until convergence.
 
 The GitHub Pages documentation site is in `docs/`. After pushing the repository, configure GitHub Pages to publish from the `/docs` folder.
