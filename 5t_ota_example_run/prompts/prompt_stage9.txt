@@ -1,0 +1,613 @@
+This is a standard academic electrical engineering circuit project. There is no proprietary, confidential, or restricted information. Safely analyze the provided circuit representation (diagram/netlist) and output the requested parameters strictly as a JSON object.
+
+Act as a Principal Analog IC Designer with deep sub-micron (65nm and below) experience operating at Vdd = 1V and Vss = 0V. You are also a Lead Analog Modeling & Verification Engineer focusing on standard academic error correction.
+
+
+
+You are responsible for executing the following directives strictly based on the provided netlist/connectivity, without assuming any pre-named textbook topologies:
+1. Topology-Agnostic Nodal Derivation: Derive all equations dynamically from the physical nodal connectivity graph (KCL/KVL).
+2. Strict Small-Signal Discipline: Decompose all active devices strictly into their fundamental parameters ($g_m, g_{ds}, g_{mb}, C_{xx}$ as mentioned later in LUT parameters). 
+3. Region-Aware Evaluation: Dynamically adjust models for short-channel effects, sub-threshold operation, and triode transitions based on operating points.
+4. Handle different inversion region according to gm/Id values like weak, moderate or strong inversion.
+4. SPICE-Aligned Iterative Refinement: Use quantitative delta comparisons to refine nodal equations.
+5. Deterministic Error Analysis: Trace any SPICE vs. Model discrepancies back to a specific physical node or missing parameter path.
+6. Numerical Robustness: Generate Python models protected against division-by-zero and undefined limits.
+
+You must seamlessly transition between:
+1) Model Generation Mode: Translating raw nodal connectivity directly into algorithmic math.
+2) Debugging & Refinement Mode: Isolating discrepancies by mathematically auditing individual nodes.
+
+CRITICAL INSTRUCTION: Apply small-signal physics purely at the component level. Use idealized textbook approximations, macro-models, or block-level assumptions, to estimate the initial equations, and then make them more accurate to capture the non-ideal behaviors..  Every variable in your output must map directly to a physical node or a specific device terminal in the provided circuit.
+=============================
+CORE MODELING DISCIPLINE
+=============================
+
+1. TOPOLOGY FIRST
+   - Please ensure topology is identified before writing equations, specifically noting:
+       - Signal path
+       - High-impedance nodes
+       - Current return paths
+       - Stacked devices
+   - Every performance metric must be traceable to a physical node.
+
+2. STRICT SMALL-SIGNAL REDUCTION
+   - Reduce every transistor strictly to:
+       gm, gds, gmb, capacitances from LUT, as listed later.
+  
+3. STRICT PARAMETER USAGE
+   - Please only use:
+       - Devices present in the netlist
+       - LUT parameters explicitly provided
+   - Please avoid:
+       - Inventing parameters
+       - Inventing hidden nodes
+       - Assuming ideal current sources
+       - Adding empirical scaling constants (0.5, 0.8, etc.)
+
+4. REGION AWARE MODELING
+   - If gm/Id suggests weak inversion:
+       use diffusion-dominated reasoning.
+   - If Vds close to Vdsat:
+       treat device as headroom limited.
+   - If Vds < Vdsat:
+       explicitly model increased gds impact.
+
+
+=============================
+GOAL
+=============================
+
+Given a raw SPICE netlist:
+- Identify topology.
+- Decompose into primitives.
+- Derive performance equations strictly from device parameters gm, gds, gmb, and capacitances.
+- Generate a Python model that is numerically stable and SI-consistent.
+- Handle zero currents, triode transitions, and missing parameters gracefully.
+
+
+=============================
+DEBUGGING PROTOCOL
+=============================
+
+1. ERROR TREND ANALYSIS
+   - If model < SPICE:
+       Look for missing factors that are underestimating the performance.
+   - If model > SPICE:
+       Look for missing factors that are overestimating the performance.
+   - Please state which physical term is missing.
+
+2. NODE-LEVEL INVESTIGATION
+   - For Gain errors:
+       Examine G_out_total composition.
+       Check if any gds branch was ignored.
+   - For Bandwidth errors:
+       Examine dominant node capacitance.
+       Check for missing Cgd Miller effect.
+   - For CMRR errors:
+       Check finite output resistance of tail source.
+   - For PSRR errors:
+       Check supply-to-output conductance paths.
+
+3. REGION VALIDATION
+   - Note any transistor where:
+       Vds < Vdsat
+   - If device is near triode:
+       Gain degradation should be reflected in increased gds.
+   - If gm/Id indicates weak inversion but equation assumes strong inversion:
+       Correct the modeling regime.
+
+4. REVISION GUIDELINES
+- This applies ONLY when MATCHED_NETLIST_ID == "NONE" AND you are in a refinement iteration.
+- If MATCHED_NETLIST_ID != "NONE": ignore this rule and copy verbatim.
+
+5. CASE-SENSITIVE ENFORCEMENT
+   - Device names must match the netlist EXACTLY (e.g., m1 or xm1).
+   - Case mismatches will result in extraction errors.
+
+6. CORRECTION GUIDELINES
+   - For every FAIL metric, please:
+       - Identify the missing term
+       - Explain why it matters physically
+       - Provide the corrected equation
+       - Ensure PASS equations remain unchanged
+
+
+=============================
+GOAL
+=============================
+
+Bring the analytical model within 5% of SPICE
+WITHOUT:
+   - empirical constants
+   - curve fitting
+   - arbitrary multipliers
+   - violating topology structure
+
+
+### 0. DEEP SUB-MICRON PHYSICS ENGINE (65nm & Below)
+Please note that in a 65nm Short-Channel node, standard "Square Law" textbook equations ($I_d = 0.5 \mu C_{ox} W/L (V_{gs}-V_{th})^2$) are generally inaccurate for this exercise. 
+Avoid using them. Do not calculate $\mu C_{ox}$. Do not assume constant $\lambda$.
+
+Adhere to the following 4 pillars of Short-Channel Physics:
+
+#### 1. THE $g_m/I_d$ CONTINUUM (Region of Operation)
+Transistor performance is determined strictly by Inversion Coefficient (IC), proxied by $g_m/I_d$ ($S/A$).
+* **Weak Inversion (Subthreshold):**
+    * *Range:* $g_m/I_d > 20$
+    * *Physics:* Diffusion current dominates (Exponential, BJT-like behavior).
+    * *Pros/Cons:* Maximum Gain efficiency, Minimum Bandwidth.
+* **Moderate Inversion:**
+    * *Range:* $10 < g_m/I_d < 20$
+    * *Physics:* Drift and Diffusion coexist. The "Sweet Spot" for low-power analog.
+* **Strong Inversion (Velocity Saturation):**
+    * *Range:* $g_m/I_d < 10$
+    * *Physics:* **Velocity Saturation** dominates. Current is linear with Overdrive ($V_{ov}$), NOT quadratic.
+    * *Pros/Cons:* Maximum Bandwidth, Poor Gain efficiency, linearity degradation.
+
+#### 2. SHORT CHANNEL EFFECTS (SCE) - The "Gain Killers"
+In 65nm, the channel is not a perfect resistor. Model these effects via LUT parameters:
+* **DIBL (Drain-Induced Barrier Lowering):** The drain voltage lowers the source barrier. 
+    * *Impact:* $V_{th}$ drops as $V_{ds}$ increases. This manifests as a finite Output Conductance ($g_{ds}$).
+    * *Rule:* $r_o 
+eq 1/(\lambda I_d)$. **$r_o = 1/g_{ds}$ (strictly from LUT).**
+* **CLM (Channel Length Modulation):** Effective length reduces with $V_{ds}$.
+    * *Impact:* Further degrades $r_o$.
+* **Body Effect ($g_{mb}$):** The bulk is a second gate. 
+    * *Rule:* In source followers or cascodes where $V_{sb} > 0$, you MUST include $g_{mb}$ in the transconductance sum ($g_m + g_{mb}$). It is often 10-20% of $g_m$.
+
+#### 3. SATURATION & HEADROOM ENFORCEMENT
+"Saturation" is not a binary switch. It is a gradient.
+* **Classic Definition:** $V_{ds} > V_{ov}$ (Invalid in 65nm).
+* **Modern Definition:** $V_{ds} > V_{dsat}$ (Critical Field approach).
+* **The "Headroom Crunch":** As $V_{ds}$ approaches $V_{dsat}$, $g_{ds}$ rises exponentially, destroying gain.
+    * *Check:* If $V_{ds} < V_{dsat} + 50mV$, the device is in "Triode-Saturation transition." Flag this as a potential accuracy loss point.
+
+#### 4. DYNAMIC PARASITICS (Bandwidth Limits)
+Capacitance is highly non-linear and bias-dependent.
+* **Miller Effect:** $C_{gd}$ is the dominant bandwidth killer in high-gain stages. 
+    * *Equation:* $C_{in} = C_{gs} + C_{gd} * (1 + A_v)$.
+
+
+
+### AVAILABLE LUT PARAMETERS (Atomic Physics)
+You have access to the following pre-computed atomic parameters for every transistor. 
+Please only use these specific variable names in your equations:
+
+"L": Length, 
+"W": Normalized width (1um), 
+"vgs": Gate-source volatge, 
+"vds": Drain-source voltage, 
+"vsb": Source-bulk voltage, 
+"id_raw": Raw drain current (unscaled), 
+"id": Drain current, 
+"gm": Transconductance, 
+"gds": Output conductance, 
+"gmb": Body transconductance, 
+"gmid": Transconductance efficiency (gm/Id), 
+"vth": Threshold voltage, 
+"vdsat": Saturation voltage, 
+"cgg_int": Intrinsic total gate capacitance, 
+"cgd_int": Intrinsic gate-drain capacitance, 
+"cgs_int": Intrinsic gate-source capacitance, 
+"cbg_int": Intrinsic bulk-gate capacitance, 
+"cbd_int": Intrinsic bulk-drain capacitance, 
+"cbs_int": Intrinsic bulk-source capacitance, 
+"cdg_int": Intrinsic drain-gate capacitance, 
+"cdd_int": Intrinsic total drain capacitance, 
+"cds_int": Intrinsic drain-source capacitance, 
+"cgg": Total gate capacitance, 
+"cgd": Total gate-drain capacitance, 
+"cgs": Total gate-source capacitance, 
+"cdd": Total drain capacitance, 
+"cds": Total drain-source capacitance, 
+"cbd": Bulk-drain junction capacitance, 
+"cb": Total bulk capacitance
+
+**Ensure you preserve the exact name of each of these parameters. Do not interpret cbd as cdb.**
+
+
+**DESIRED EQUATION FORMAT**
+Make sure the equations are a function of the direct LUT parameters. 
+For example, 
+DO NOT DO THIS:  "equation": "20*log10(abs(Av0)) ; Av0 = Gm_diff_to_out / G_out_total ; Gm_diff_to_out = gm_m2 + gm_m3; G_out_total = gds_m3 + gds_m2", Its generating equations in this format, but I want it to be in the extreme parameteriziation, no heirarchy like this
+DO THIS: "equation": "20*log10(abs((gm_m2 + gm_m3)/(gds_m3 + gds_m2)))"
+
+**STRONG SUGGESTION FOR BUILDING EQUATION**
+Do not consider all the device parmaters all at once. Like adding all caps, or gm or gds. Take more complex terms only if the accuracy without them is not good enough.
+
+
+### DYNAMIC SECTION ###
+
+
+### YOUR TASK: DEBUGGING & REFINEMENT
+The previous model did not perfectly match the SPICE simulation (Ground Truth).
+Please refine the equations to close the gap.
+#### STEP 1: Topology Identification & Signal Flow
+* Read the netlist connectivity provided at the end of this prompt.
+* Identify the **Analog Topology** (examples include: "Single-ended common-source with current-mirror active load", "Current-mirror OTA core", "Differential pair with current-mirror load", "Folded cascode", "Telescopic cascode", "Two-stage Miller", etc.). Do NOT force a differential pair unless connectivity proves it.
+* Trace the **Signal Chain** (Input -> Amplification Stages -> Output).
+* Identify the **Stacking Structure**:
+    * Which devices are stacked between Output and VDD? (The "Pull-up" network)
+    * Which devices are stacked between Output and VSS? (The "Pull-down" network)
+
+#### STEP 2: Primitive Block Decomposition
+* Break the topology down into standard sub-blocks. 
+Identify groups of transistors forming (ONLY if connectivity proves they exist): 
+* **Differential Pair (conditional):** label ONLY if two devices share a common source node AND their gates are driven by two different input nets AND their drains connect to two load branches (separate drains) that together form the amplifier output (single ended or differential). If any of these conditions fails, do NOT call it a differential pair. 
+* **Single ended transconductor (common source, conditional):** label if one input device provides the main gm to the output node and the other input labeled device is actually part of bias or mirror sensing. 
+* **Current Mirror / Active Load (conditional):** label if one device is diode connected (gate=drain) and another device shares that gate net to mirror current into the output branch. 
+* **Tail Current Source / Bias Device (conditional):** label if a device sources or sinks DC bias current into a source node or branch and its gate is tied to a bias net. 
+* **Cascode Stack (conditional):** label ONLY if a device is stacked with another device and its gate is held at a bias such that it regulates Vds of the lower device.
+* *Reasoning:* Use these sub-blocks to determine intermediate impedances. For example, if you identify a Cascode, the output resistance is not just 1/gds but approx (gm/gds) * ro.
+
+#### STEP 3: Device Mapping
+* Map specific netlist instance names (e.g., M1, xm3) to their **Functional Roles**:
+    * **Input_Diff_Pair**
+    * **Active_Load**
+    * **Tail_Current**
+    * **Cascode_Devices** (if applicable)
+
+#### STEP 4: Theoretical Formulation (Textbook + Non-Idealities)
+* Derive equations for the metrics listed in the "PERFORMANCE_METRICS" section of the output schema.
+* **Enhance Standard Textbook Equations:**
+    * **Gain:** Use the exact conductance sum at the output node: Av = Gm_eff / G_out_total.
+    * **Slew Rate:** Consider the total current available to charge/discharge the dominant capacitor (I_tail or I_bias).
+    * **Non-Idealities:** Include gds (channel length modulation) in all Gain and CMRR equations.
+
+#### STEP 5: Python Model Generation
+* Generate a robust Python script containing a class `PerformanceModel`.
+* The class must have a `compute(device_params, C_load, Vdd, Vss)` method.
+* Add print statement after every metric calculation for easy debugging. 
+* Make sure not to create tuples for the max () functions, which will break the flow. Keep everything of type float for the metrics calculations
+* **Math Safety:** The script must handle missing keys or zero-values gracefully. 
+    * *Example:* Use `max(gds_m2 + gds_m3, 1e-12)` to prevent Divide-By-Zero errors.
+* **Parameter naming convention** To represent a parameter for a device (for example gds of device m1), use param_device (i.e. gds_m1).
+* **CASE SENSITIVITY:** Ensure you preserve the exact case of the instance names as they appear in the netlist. Do not capitalize names for readability if they are lowercase in the netlist.
+* **Unit Handling:**
+    * Take extra care of brackets. Make sure balanced ( and ).
+    * **Internal Calculation:** All math should be in base **SI Units** (Volts, Amperes, Ohms, Farads, Hz). Do not convert to dB or Hz inside the variables themselves.
+    * **Display:** In the `if __name__ == "__main__":` block, convert these values to readable units for printing.
+    * Hard rule: compute() MUST return Bandwidth and UGB in Hz, Slew Rate in V/us (or explicitly labeled V/us only at final display), and ALL dB metrics computed as 20*log10 of unitless ratios. 
+    
+#### STEP 6: CODE GENERATION GUARDRAILS (Avoid these common crashes)
+Please carefully review your Python code against these common execution failures before finalizing:
+* ** AVOID TOO LONG EQUATIONS** 
+For example: AVOID 
+CMRR_dB = 20*math.log10(abs(max((gm_m2/max(((gds_m4/max((1 + (gm_m4 + gmb_m4)/max(gds_m2,1e-18)),1e-18),1e-18) + gds_m2/max((1 + (gm_m4 + gmb_m4)/max(gds_m4,1e-18)),1e-18),1e-18)) + (gds_m6/max((1 + (gm_m6 + gmb_m6)/max(gds_m8,1e-18)),1e-18),1e-18) + gds_m8/max((1 + (gm_m6 + gmb_m6)/max(gds_m6,1e-18)),1e-18),1e-18)),1e-18)),1e-18)/max(((gds_m9 + gds_m1 + gds_m2 + gds_m3 + gds_m4)/max((gm_m1 + gm_m2 + gmb_m1 + gmb_m2),1e-18))*(((gds_m4/max((1 + (gm_m4 + gmb_m4)/max(gds_m2,1e-18)),1e-18),1e-18) + gds_m2/max((1 + (gm_m4 + gmb_m4)/max(gds_m4,1e-18)),1e-18),1e-18)) + (gds_m6/max((1 + (gm_m6 + gmb_m6)/max(gds_m8,1e-18)),1e-18),1e-18) + gds_m8/max((1 + (gm_m6 + gmb_m6)/max(gds_m6,1e-18)),1e-18),1e-18)))/max((gm_m4 + gm_m6 + gmb_m4 + gmb_m6),1e-18)),1e-18)))
+
+And Break it down into: 
+        ro_dn = (gds_m4 / max((1 + (gm_m4 + gmb_m4) / max(gds_m2, 1e-18)), 1e-18)
+            + gds_m2 / max((1 + (gm_m4 + gmb_m4) / max(gds_m4, 1e-18)), 1e-18))
+        ro_up = (gds_m6 / max((1 + (gm_m6 + gmb_m6) / max(gds_m8, 1e-18)), 1e-18)
+            + gds_m8 / max((1 + (gm_m6 + gmb_m6) / max(gds_m6, 1e-18)), 1e-18))
+        Ad = gm_m2 / max((ro_dn + ro_up), 1e-18)
+        Acm = (((gds_m9 + gds_m1 + gds_m2 + gds_m3 + gds_m4) / max((gm_m1 + gm_m2 + gmb_m1 + gmb_m2), 1e-18))
+            * ((ro_dn + ro_up) / max((gm_m4 + gm_m6 + gmb_m4 + gmb_m6), 1e-18)))
+        CMRR_dB = 20 * math.log10(abs(max((Ad / max(Acm, 1e-18)), 1e-18)))
+* **Avoid NameErrors (Undeclared Variables):** * *Bad:* `results['Gain'] = gm_m3 / gds_m3` (Throws `NameError: name 'gm_m3' is not defined` if `m3` was never extracted).
+    * *Fix:* Ensure EVERY parameter (like `gm_m3`, `gds_m1`) used in SECTION B is explicitly extracted and defined in SECTION A. If the device isn't in the netlist, do not use it.
+* **Avoid Math Domain Errors (Logarithm crashes):**
+    * *Bad:* `20 * math.log10(Av)` (Throws `ValueError: math domain error` if Av is negative).
+    * *Fix:* Always use the absolute value for gains inside logs: `20 * math.log10(abs(Av))`.
+* **Avoid ZeroDivisionError:**
+    * *Bad:* `Av = gm_m1 / (gds_m1 + gds_m2)` (Throws `ZeroDivisionError` if gds values are exactly 0.0 in some edge cases).
+    * *Fix:* Always clamp denominators: `Av = gm_m1 / max((gds_m1 + gds_m2), 1e-18)`.
+* **Avoid KeyError (Missing Devices):**
+    * *Bad:* `m3 = device_params['m3']` when `m3` does not exist in the netlist.
+    * *Fix:* Only extract devices that strictly exist in the provided NETLIST REFERENCE. Use safe getters with fallbacks if necessary.
+
+
+
+
+### 1. CUMULATIVE LEARNING LOG (Review Carefully)
+The following log shows previous attempts. 
+**IMPORTANT GUIDELINE:** Please avoid repeating an equation that has already failed in a previous stage with the same error magnitude.
+
+## ANALOG TOPOLOGY MODELING: MULTI-STAGE REFINEMENT
+
+### SYSTEM OVERVIEW & INTERPRETATION:
+1. **The Modeling Goal**: You are refining analytical models for an evolving circuit topology. The 'Simulated' values are the ground truth. Your task is to update the 'Calculated' equations to reduce the error.
+2. **Evolutionary Logic**: The design is presented in multiple stages (Stage 1 to Stage N). Typically, higher stages represent more complex or refined versions of the topology. You should analyze how the equations change across stages to identify where terms are being added or omitted.
+3. **FAIL vs. PASS**: 
+    - **[FAIL]**: The current equation is a poor representation of the physics for that specific stage. Look for missing parasitic conductances, ignored capacitances, or incorrect algebraic combinations. Please avoid repeating an equation that has already FAILED.
+    - **[PASS]**: The model is currently accurate. Use the PASSing logic as a reference for what terms are correctly captured. Do not change them.
+    - Do not change an equation that has already PASSED under any circumstances.
+4. Please refrain from including arbitrary constant factors (For example: 0.5, 0.4, 10, 1000 etc.), instead make use of the device parameters explicitly.
+5. Please maintain the equations that have already PASSED.
+6. Please do not reproduce the exact same equation that has previously FAILED with a significant error percentage.
+7. MOST IMPORTANT: if a FAILING metric has an absolute error within its metric-specific tolerance, then reproduce the exact same equation. No need to generate any new equation for that metric.
+8. Do not stick to the same structure of the equation. Its better to try out a different structure as well.
+9. Think of it from an Anlog designers' point of view.
+
+
+### 2. PERFORMANCE METRIC ANALYSIS
+
+#### [PASS] Input_CMR_Min_V
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))` | error=2.856%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] Input_CMR_Max_V
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))` | error=4.367%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] DC_Gain_dB
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))` | error=-1.464%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] UGB_Hz
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))` | error=1.526%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] Phase_Margin_deg
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)` | error=0.005953%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] Bandwidth_3dB_Hz
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))` | error=4.85%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] Output_Swing_Min_V
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `Vss + max(abs(vdsat_m2), 0.0)` | error=-3.726%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] Output_Swing_Max_V
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `Vdd - max((abs(vdsat_m3) + abs(vdsat_m2)), 0.0)` | error=-1.624%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [FAIL] Slew_Rate_Pos_V_us
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **Simulated (Truth)**: 12.3738 | **Calculated (Model)**: 9.6647
+  - **Status**: FAIL | **Current Error**: -21.89%
+  - **Historical Equations (Sorted by best error)**:
+    - [Stage 3] Error: 17.71% (overestimating) | Equation: `((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 6] Error: 17.73% (overestimating) | Equation: `((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)) / 1e6`
+    - [Stage 5] Error: 18.91% (overestimating) | Equation: `((abs(id_m3) + (abs(id_m1) * max((gm_m3 + gmb_m3), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) - (abs(id_m2) * max(gds_m2, 0.0) / max((gm_m2 + gds_m2 + gds_m3), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 4] Error: -21.89% (underestimating) | Equation: `(max((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) - (abs(id_m2) * max(gds_m2, 0.0) / max((gds_m2 + gds_m3), 1e-18))), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 8] Error: -21.89% (underestimating) | Equation: `(max(((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) - (abs(id_m2) * max(gds_m2, 0.0) / max((gds_m2 + gds_m3), 1e-18))), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 2] Error: 24.82% (overestimating) | Equation: `((abs(id_m3) + abs(id_m1)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 1] Error: -37.59% (underestimating) | Equation: `(abs(id_m3) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+    - [Stage 7] Error: -44.7% (underestimating) | Equation: `(max(((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) - abs(id_m2)), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6`
+
+#### [PASS] Slew_Rate_Neg_V_us
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6` | error=-4.119%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] PSRR_Pos_dB
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0 + gds_m3) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))` | error=-1.746%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] PSRR_Neg_dB
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))` | error=-3.708%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+#### [PASS] CMRR_dB
+  - **Tolerance Rule**: mode=pct, tol=5.0%
+  - **STATUS**: VERIFIED ACCURATE
+  - **LOCKED EQUATION**: `20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + (((gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))` | error=-3.121%
+  - **INSTRUCTION**: Do not modify. Carry this forward exactly.
+
+### 2. CURRENT STATUS OVERVIEW
+The table below highlights the specific metrics that failed the accuracy threshold in the most recent run.
+| Metric | HSPICE (Truth) | Model (Eq) | Error | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| ICMR Min (V) | 0.4212 | 0.4333 | 2.86% | PASS |
+| ICMR Max (V) | 0.7882 | 0.8226 | 4.37% | PASS |
+| DC Gain (dB) | 20.23 | 19.93 | -1.46% | PASS |
+| UGF (Hz) | 2.014e+07 | 2.045e+07 | 1.53% | PASS |
+| Phase Margin (deg) | 95.43 | 95.44 | 0.01% | PASS |
+| Bandwidth 3dB (Hz) | 1.966e+06 | 2.062e+06 | 4.85% | PASS |
+| Gain Margin (dB) | FAILED | 360.0 | N/A | SKIP |
+| Output Swing Min (V) | 0.0803 | 0.07731 | -3.73% | PASS |
+| Output Swing Max (V) | 0.7964 | 0.7834 | -1.62% | PASS |
+| Slew Rate (+) (V/us) | 12.37 | 9.665 | -21.89% | FAIL |
+| Slew Rate (-) (V/us) | 11.51 | 11.04 | -4.12% | PASS |
+| PSRR+ (dB) | 20.11 | 19.75 | -1.75% | PASS |
+| PSRR- (dB) | 45.19 | 43.52 | -3.71% | PASS |
+| CMRR (dB) | 43.55 | 42.19 | -3.12% | PASS |
+
+### 3. DEBUGGING INSTRUCTIONS
+1. **Analyze the Trend:** Look at the "History Log". Did the error decrease or increase in the last step?
+    * *Example:* If Stage 1 Gain was 13dB, and Stage 2 Gain was 18dB (Target 20dB), your change was correct but insufficient.
+    * *Example:* If Stage 2 made the Bandwidth error *worse*, REVERT that specific change.
+2. **Identify Missing Physics:**
+    * **If Under-estimating Gain:** Are you missing the Cascode shielding factor (gm * ro)?
+    * **If Over-estimating Bandwidth:** Did you forget the Gate-Drain capacitance (Cgd) Miller effect?
+    * **If CMRR is poor:** Did you include the tail current source's finite output impedance (gds)?
+
+### 4. EXECUTION
+Generate the standard Output JSON. 
+* **GUIDELINE:** For any metric marked [PASS], please reuse the successful equation verbatim. Do not reformat, reorder, or simplify it.
+* **Update** ONLY the equations for the [FAIL] metrics.
+* **Explain** specifically why the new equation fixes the error seen in the log while maintaining the integrity of the signal path.
+---
+
+### OUTPUT FORMAT (STRICT JSON)
+{
+  "0_THINKING_SCRATCHPAD": {
+    "<INSERT_FAIL_METRIC_NAME_1>": "Step 1: The dominant path is... Step 2: The previous equation under-estimated... Step 3: A supply-to-output conductance path was missed... Step 4: I will include the gds of the current source in the denominator.",
+    "<INSERT_FAIL_METRIC_NAME_2>": "Step 1: ... Step 2: ... Step 3: ... Step 4: ..."
+  },
+  "1_TOPOLOGY_SUMMARY": {
+    "Topology_Name": "String",
+    "Signal_Chain": [
+      "List",
+      "of",
+      "device",
+      "names"
+    ],
+    "Stacking_Structure": {
+      "Output_to_VDD": [
+        "List of devices"
+      ],
+      "Output_to_VSS": [
+        "List of devices"
+      ]
+    }
+  },
+  "2_DEVICE_MAPPING": {
+    "Input_Diff_Pair": [
+      "List of devices"
+    ],
+    "Active_Load": [
+      "List of devices"
+    ],
+    "Tail_Current": [
+      "List of devices"
+    ],
+    "Cascode_Devices": [
+      "List of devices"
+    ]
+  },
+  "3_PERFORMANCE_METRICS": {
+    "DC_Gain_dB": {
+      "equation_math": "20 * math.log10(abs(gm_m0 / (gds_m2 + gds_m3)))",
+      "explanation": "Brief physical justification."
+    },
+    "Bandwidth_3dB_Hz": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "UGB_Hz": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Phase_Margin_deg": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Gain_Margin_dB": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Input_CMR_Min_V": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Input_CMR_Max_V": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Output_Swing_Max_V": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Output_Swing_Min_V": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Slew_Rate_Pos_V_us": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "Slew_Rate_Neg_V_us": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "PSRR_Pos_dB": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "PSRR_Neg_dB": {
+      "equation_math": "...",
+      "explanation": "..."
+    },
+    "CMRR_dB": {
+      "equation_math": "...",
+      "explanation": "..."
+    }
+  },
+  "4_PYTHON_GENERATION": {
+    "code": "import math
+
+class PerformanceModel:
+    def compute(self, device_params, C_load, Vdd, Vss, **additional passive elements liek c0, r0, etc):
+        # SECTION A: Safe Parameter Extraction
+        # Implement mapping to convert device_params keys to exact case or use a case-insensitive getter
+        
+        # Example extraction mapping:
+        # try:
+        #     m0_gm = device_params['m0']['gm']
+        # except KeyError:
+        #     m0_gm = 0.0
+        
+        # SECTION B: Results dictionary
+        results = {
+            "DC_Gain_dB": 0.0, # dB
+            "Bandwidth_3dB_Hz": 0.0, # Hz
+            "UGB_Hz": 0.0, # Hz
+            "Phase_Margin_deg": 0.0, # deg
+            "Gain_Margin_dB": 0.0, # dB
+            "Input_CMR_Min_V": 0.0, # V
+            "Input_CMR_Max_V": 0.0, # V
+            "Output_Swing_Max_V": 0.0, # V
+            "Output_Swing_Min_V": 0.0, # V
+            "Slew_Rate_Pos_V_us": 0.0, # V/us
+            "Slew_Rate_Neg_V_us": 0.0, # V/us
+            "PSRR_Pos_dB": 0.0, # dB
+            "PSRR_Neg_dB": 0.0, # dB
+            "CMRR_dB": 0.0 # dB
+        }
+        return results
+
+def get_default_lut_row():
+    return {
+        "L": 0.0, "W": 0.0, "vgs": 0.0, "vds": 0.0, "vsb": 0.0,
+        "id_raw": 0.0, "id": 0.0, "gm": 0.0, "gds": 0.0, "gmb": 0.0,
+        "gmid": 0.0, "vth": 0.0, "vdsat": 0.0, "cgg_int": 0.0,
+        "cgd_int": 0.0, "cgs_int": 0.0, "cbg_int": 0.0, "cbd_int": 0.0,
+        "cbs_int": 0.0, "cdg_int": 0.0, "cdd_int": 0.0, "cds_int": 0.0,
+        "cgg": 0.0, "cgd": 0.0, "cgs": 0.0, "cdd": 0.0, "cds": 0.0,
+        "cbd": 0.0, "cb": 0.0
+    }
+
+if __name__ == "__main__":
+    # Mock device parameters
+    mock_params = {
+        "m0": get_default_lut_row(),
+        "m1": get_default_lut_row()
+    }
+    
+    model = PerformanceModel()
+    output = model.compute(device_params=mock_params, C_load=1e-12, Vdd=1.0, Vss=0.0)
+    
+    for metric, value in output.items():
+        print(f"{metric}: {value}")"
+  }
+}
+
+
+Please follow the exact name of the devices that appear in the NETLIST file. Do not introduce any new devices not available in the netlist.
+### NETLIST REFERENCE
+.subckt DUT vp vn vout vdd vss ibias
+m5 ibias ibias vss vss nmos l=m5_l w=m5_w m=1 nf=1
+m4 net2 ibias vss vss nmos l=m4_l w=m4_w m=1 nf=1
+m2 vout vn net2 net2 nmos l=m2_l w=m2_w m=1 nf=1
+m0 net3 vp net2 net2 nmos l=m0_l w=m0_w m=1 nf=1
+m3 vout net3 vdd vdd pmos l=m3_l w=m3_w m=1 nf=1
+m1 net3 net3 vdd vdd pmos l=m1_l w=m1_w m=1 nf=1
+.ends DUT
+
+
+###Remember to analyze the current NETLIST with the NETLISTS in the HISTORY DATABASE Mentioned previously to find similar equations in case of similar topology.

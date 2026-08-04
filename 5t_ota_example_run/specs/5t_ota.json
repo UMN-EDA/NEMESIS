@@ -1,0 +1,302 @@
+{
+  "meta": {
+    "agent": "NEMESIS_gmID_Estimator",
+    "application": "general_purpose_balanced_ota",
+    "design_intent": "balanced",
+    "is_final_sizing": false,
+    "notes": [
+      "First-pass gm/ID LUT guidance, not final SPICE sizing."
+    ],
+    "warnings": [
+      "MOS lengths are symbolic; using supplied common L."
+    ]
+  },
+  "testbench": {
+    "Vdd": 1.0,
+    "Vss": 0.0,
+    "ibias": 5e-06,
+    "C_load": 5e-13,
+    "SR": null,
+    "L": 1.8e-07
+  },
+  "topology_analysis": {
+    "identified_ota_class": "5T OTA",
+    "input_pair_devices": [
+      "m0",
+      "m2"
+    ],
+    "tail_devices": [
+      "m4"
+    ],
+    "current_mirror_groups": [
+      [
+        "m5",
+        "m4"
+      ],
+      [
+        "m1",
+        "m3"
+      ]
+    ],
+    "active_load_groups": [
+      [
+        "m1",
+        "m3"
+      ]
+    ],
+    "cascode_groups": [],
+    "output_stage_devices": [],
+    "cmfb_devices": [],
+    "bias_reference_devices": [
+      "m5"
+    ],
+    "auxiliary_or_unknown_devices": []
+  },
+  "current_budget": {
+    "method": "first_pass_topology_level_KCL_for_gmID_LUT_sizing",
+    "ibias_reference_current": 5e-06,
+    "sr_required_output_current": null,
+    "current_budget_conflicts": [],
+    "assumptions": [
+      "Bias currents estimated from application current plan."
+    ]
+  },
+  "primitive_groups": {
+    "nmos_input_pair": {
+      "role": "input_differential_pair",
+      "devices": [
+        "m0",
+        "m2"
+      ],
+      "device_type": "nmos",
+      "description": "NMOS differential input pair",
+      "gmid_range": [
+        14,
+        18
+      ],
+      "gmid": 16,
+      "inversion_region": "moderate",
+      "target_selection_basis": "balanced gm efficiency and speed",
+      "estimated_group_current": 1e-05,
+      "current_basis": "I_tail/2 per input branch",
+      "mirror_reference_device": null,
+      "mirror_output_devices": [],
+      "mirror_current_ratio": null,
+      "mirror_ratio_basis": "not_applicable",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "confidence": 0.9,
+      "assumptions": []
+    },
+    "nmos_tail_mirror": {
+      "role": "tail_current_source",
+      "devices": [
+        "m4"
+      ],
+      "device_type": "nmos",
+      "description": "Mirrored NMOS tail source",
+      "gmid_range": [
+        9,
+        13
+      ],
+      "gmid": 11,
+      "inversion_region": "moderate",
+      "target_selection_basis": "balanced headroom and output resistance",
+      "estimated_group_current": 1e-05,
+      "current_basis": "mirror_ratio_times_Iref",
+      "mirror_reference_device": "m5",
+      "mirror_output_devices": [
+        "m4"
+      ],
+      "mirror_current_ratio": 2.0,
+      "mirror_ratio_basis": "application_current_plan",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "confidence": 0.72,
+      "assumptions": []
+    },
+    "nmos_bias_reference": {
+      "role": "bias_current_mirror_or_reference",
+      "devices": [
+        "m5"
+      ],
+      "device_type": "nmos",
+      "description": "Diode NMOS bias reference",
+      "gmid_range": [
+        9,
+        13
+      ],
+      "gmid": 11,
+      "inversion_region": "moderate",
+      "target_selection_basis": "reference mirror stability",
+      "estimated_group_current": 5e-06,
+      "current_basis": "ibias",
+      "mirror_reference_device": "m5",
+      "mirror_output_devices": [
+        "m4"
+      ],
+      "mirror_current_ratio": null,
+      "mirror_ratio_basis": "not_applicable",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "confidence": 0.86,
+      "assumptions": []
+    },
+    "pmos_mirror_load": {
+      "role": "active_load",
+      "devices": [
+        "m1",
+        "m3"
+      ],
+      "device_type": "pmos",
+      "description": "PMOS current mirror load",
+      "gmid_range": [
+        8,
+        12
+      ],
+      "gmid": 10,
+      "inversion_region": "moderate",
+      "target_selection_basis": "balanced gain and pole placement",
+      "estimated_group_current": 1e-05,
+      "current_basis": "same_as_input_branches",
+      "mirror_reference_device": "m1",
+      "mirror_output_devices": [
+        "m3"
+      ],
+      "mirror_current_ratio": 1.0,
+      "mirror_ratio_basis": "matched_active_load_1_to_1",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "confidence": 0.84,
+      "assumptions": []
+    }
+  },
+  "devices": {
+    "m5": {
+      "type": "nmos",
+      "group_id": "nmos_bias_reference",
+      "role": "bias_current_mirror_or_reference",
+      "description": "diode-connected bias reference",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        9,
+        13
+      ],
+      "gmid": 11,
+      "inversion_region": "moderate",
+      "I": 5e-06,
+      "current_basis": "ibias",
+      "mirror_ratio_if_applicable": null,
+      "is_current_assumed": false,
+      "is_gmid_sized": true,
+      "confidence": 0.86,
+      "notes": []
+    },
+    "m4": {
+      "type": "nmos",
+      "group_id": "nmos_tail_mirror",
+      "role": "tail_current_source",
+      "description": "mirrored tail current source",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        9,
+        13
+      ],
+      "gmid": 11,
+      "inversion_region": "moderate",
+      "I": 1e-05,
+      "current_basis": "mirror_ratio_times_Iref",
+      "mirror_ratio_if_applicable": 2.0,
+      "is_current_assumed": true,
+      "is_gmid_sized": true,
+      "confidence": 0.72,
+      "notes": []
+    },
+    "m2": {
+      "type": "nmos",
+      "group_id": "nmos_input_pair",
+      "role": "input_differential_pair",
+      "description": "right input transistor",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        14,
+        18
+      ],
+      "gmid": 16,
+      "inversion_region": "moderate",
+      "I": 5e-06,
+      "current_basis": "I_tail/2",
+      "mirror_ratio_if_applicable": null,
+      "is_current_assumed": true,
+      "is_gmid_sized": true,
+      "confidence": 0.9,
+      "notes": []
+    },
+    "m0": {
+      "type": "nmos",
+      "group_id": "nmos_input_pair",
+      "role": "input_differential_pair",
+      "description": "left input transistor",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        14,
+        18
+      ],
+      "gmid": 16,
+      "inversion_region": "moderate",
+      "I": 5e-06,
+      "current_basis": "I_tail/2",
+      "mirror_ratio_if_applicable": null,
+      "is_current_assumed": true,
+      "is_gmid_sized": true,
+      "confidence": 0.9,
+      "notes": []
+    },
+    "m3": {
+      "type": "pmos",
+      "group_id": "pmos_mirror_load",
+      "role": "active_load",
+      "description": "PMOS mirror output load",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        8,
+        12
+      ],
+      "gmid": 10,
+      "inversion_region": "moderate",
+      "I": 5e-06,
+      "current_basis": "same_as_branch",
+      "mirror_ratio_if_applicable": 1.0,
+      "is_current_assumed": true,
+      "is_gmid_sized": true,
+      "confidence": 0.84,
+      "notes": []
+    },
+    "m1": {
+      "type": "pmos",
+      "group_id": "pmos_mirror_load",
+      "role": "diode_connected_load",
+      "description": "diode PMOS mirror load",
+      "L": 1.8e-07,
+      "L_basis": "common_user_L",
+      "gmid_range": [
+        8,
+        12
+      ],
+      "gmid": 10,
+      "inversion_region": "moderate",
+      "I": 5e-06,
+      "current_basis": "same_as_branch",
+      "mirror_ratio_if_applicable": null,
+      "is_current_assumed": true,
+      "is_gmid_sized": true,
+      "confidence": 0.84,
+      "notes": []
+    }
+  }
+}

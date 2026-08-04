@@ -1,0 +1,102 @@
+{
+  "0_THINKING_SCRATCHPAD": {
+    "No_SPICE_Reference": "No SPICE metric failures or refinement deltas were provided. The equations therefore use topology-derived first-order nodal terms plus non-ideal gds, gmb, finite mirror gain, finite tail conductance, and explicit capacitance loading. Region effects are carried by LUT gm, gds, gmb, gmid, vds, and vdsat values rather than square-law assumptions."
+  },
+  "1_TOPOLOGY_SUMMARY": {
+    "Topology_Name": "Five-transistor single-ended OTA with NMOS differential input pair, PMOS current-mirror active load, and NMOS current-mirror tail bias",
+    "Signal_Chain": [
+      "vp drives m0 gate",
+      "m0 drain current modulates diode-connected PMOS m1 at net3",
+      "net3 drives PMOS mirror device m3",
+      "vn drives m2 gate directly at vout",
+      "m3 and m2 currents combine at vout"
+    ],
+    "Stacking_Structure": {
+      "Output_to_VDD": [
+        "m3"
+      ],
+      "Output_to_VSS": [
+        "m2",
+        "m4"
+      ]
+    }
+  },
+  "2_DEVICE_MAPPING": {
+    "Input_Diff_Pair": [
+      "m0",
+      "m2"
+    ],
+    "Active_Load": [
+      "m1",
+      "m3"
+    ],
+    "Tail_Current": [
+      "m4"
+    ],
+    "Cascode_Devices": [],
+    "Bias_Mirror_Reference": [
+      "m5"
+    ]
+  },
+  "3_PERFORMANCE_METRICS": {
+    "DC_Gain_dB": {
+      "equation_math": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+      "explanation": "Differential input current is converted by m2 directly and by m0 through the finite-gain m1-m3 PMOS mirror. Output resistance is limited by the physical gds branches of m2 and m3 at vout."
+    },
+    "Bandwidth_3dB_Hz": {
+      "equation_math": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+      "explanation": "The dominant pole is at vout. The capacitance includes load capacitance, drain capacitances of m2 and m3, direct input-output cgd of m2, and Miller-coupled cgd of m3 through net3."
+    },
+    "UGB_Hz": {
+      "equation_math": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+      "explanation": "Unity-gain bandwidth is the low-frequency gain magnitude multiplied by the dominant output pole frequency."
+    },
+    "Phase_Margin_deg": {
+      "equation_math": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+      "explanation": "The first pole is at vout and the second pole is at net3, the PMOS mirror gate/drain node. No RHP zero is introduced because no compensation capacitor is present in the netlist."
+    },
+    "Gain_Margin_dB": {
+      "equation_math": "20 * math.log10(abs(1.0 / max(0.0, 1e-18)))",
+      "explanation": "With only the vout pole and net3 mirror pole in this primitive model, the phase reaches -180 degrees only asymptotically, so the finite phase-crossover gain is zero and the gain margin is numerically reported using the safety floor."
+    },
+    "Input_CMR_Min_V": {
+      "equation_math": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0)",
+      "explanation": "The minimum input common-mode voltage must keep the tail device m4 and the NMOS input devices m0/m2 biased with sufficient source voltage headroom."
+    },
+    "Input_CMR_Max_V": {
+      "equation_math": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+      "explanation": "The maximum input common-mode voltage is limited by the PMOS active-load voltage at net3/vout and by the saturation headroom of m0 and m2."
+    },
+    "Output_Swing_Max_V": {
+      "equation_math": "Vdd - max(abs(vdsat_m3), 0.0)",
+      "explanation": "The high output limit is set by maintaining PMOS load device m3 above its saturation voltage."
+    },
+    "Output_Swing_Min_V": {
+      "equation_math": "Vss + max(abs(vdsat_m4), 0.0) + max(abs(vdsat_m2), 0.0)",
+      "explanation": "The low output limit is set by the stacked NMOS path m2 over m4, requiring both devices to retain saturation headroom."
+    },
+    "Slew_Rate_Pos_V_us": {
+      "equation_math": "(abs(id_m3) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+      "explanation": "Positive slew is the available PMOS charging current from m3 divided by the dominant output capacitance, reported in V/us."
+    },
+    "Slew_Rate_Neg_V_us": {
+      "equation_math": "(min(abs(id_m2), abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+      "explanation": "Negative slew is limited by the output NMOS discharge path through m2 and the tail current available from m4, reported in V/us."
+    },
+    "PSRR_Pos_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * gds_m1 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+      "explanation": "Positive supply feedthrough reaches vout through m3 gds and through the m1-m3 mirror gate path at net3."
+    },
+    "PSRR_Neg_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+      "explanation": "Negative supply feedthrough enters through finite tail conductance m4 and couples to vout through the m2 source/drain path."
+    },
+    "CMRR_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))), 1e-18)))",
+      "explanation": "Common-mode gain comes from finite mirror imbalance between m0/m1/m3 and m2 plus finite tail conductance m4. CMRR is differential gain divided by this common-mode gain."
+    }
+  },
+  "4_PYTHON_GENERATION": {
+    "code": "import math\n\nEPS = 1e-18\n\n\ndef get_default_lut_row():\n    return {\n        'L': 0.0, 'W': 0.0, 'vgs': 0.0, 'vds': 0.0, 'vsb': 0.0,\n        'id_raw': 0.0, 'id': 0.0, 'gm': 0.0, 'gds': 0.0, 'gmb': 0.0,\n        'gmid': 0.0, 'vth': 0.0, 'vdsat': 0.0, 'cgg_int': 0.0,\n        'cgd_int': 0.0, 'cgs_int': 0.0, 'cbg_int': 0.0, 'cbd_int': 0.0,\n        'cbs_int': 0.0, 'cdg_int': 0.0, 'cdd_int': 0.0, 'cds_int': 0.0,\n        'cgg': 0.0, 'cgd': 0.0, 'cgs': 0.0, 'cdd': 0.0, 'cds': 0.0,\n        'cbd': 0.0, 'cb': 0.0\n    }\n\n\nclass PerformanceModel:\n    def _row(self, device_params, name):\n        if not isinstance(device_params, dict):\n            return get_default_lut_row()\n        row = device_params.get(name, None)\n        if row is None:\n            return get_default_lut_row()\n        base = get_default_lut_row()\n        if isinstance(row, dict):\n            base.update(row)\n        return base\n\n    def _p(self, row, key):\n        try:\n            value = row.get(key, 0.0)\n            if value is None:\n                return 0.0\n            return float(value)\n        except (TypeError, ValueError, AttributeError):\n            return 0.0\n\n    def _clamp(self, value, low, high):\n        return max(low, min(high, value))\n\n    def compute(self, device_params, C_load, Vdd, Vss):\n        # SECTION A: Safe Parameter Extraction using exact netlist instance names.\n        m0 = self._row(device_params, 'm0')\n        m1 = self._row(device_params, 'm1')\n        m2 = self._row(device_params, 'm2')\n        m3 = self._row(device_params, 'm3')\n        m4 = self._row(device_params, 'm4')\n        m5 = self._row(device_params, 'm5')\n\n        gm_m0 = self._p(m0, 'gm')\n        gm_m1 = self._p(m1, 'gm')\n        gm_m2 = self._p(m2, 'gm')\n        gm_m3 = self._p(m3, 'gm')\n        gm_m4 = self._p(m4, 'gm')\n        gm_m5 = self._p(m5, 'gm')\n\n        gds_m0 = self._p(m0, 'gds')\n        gds_m1 = self._p(m1, 'gds')\n        gds_m2 = self._p(m2, 'gds')\n        gds_m3 = self._p(m3, 'gds')\n        gds_m4 = self._p(m4, 'gds')\n        gds_m5 = self._p(m5, 'gds')\n\n        gmb_m0 = self._p(m0, 'gmb')\n        gmb_m1 = self._p(m1, 'gmb')\n        gmb_m2 = self._p(m2, 'gmb')\n        gmb_m3 = self._p(m3, 'gmb')\n        gmb_m4 = self._p(m4, 'gmb')\n        gmb_m5 = self._p(m5, 'gmb')\n\n        id_m2 = self._p(m2, 'id')\n        id_m3 = self._p(m3, 'id')\n        id_m4 = self._p(m4, 'id')\n\n        vgs_m0 = self._p(m0, 'vgs')\n        vgs_m1 = self._p(m1, 'vgs')\n        vgs_m2 = self._p(m2, 'vgs')\n        vgs_m3 = self._p(m3, 'vgs')\n        vdsat_m0 = self._p(m0, 'vdsat')\n        vdsat_m2 = self._p(m2, 'vdsat')\n        vdsat_m3 = self._p(m3, 'vdsat')\n        vdsat_m4 = self._p(m4, 'vdsat')\n\n        cdd_m0 = self._p(m0, 'cdd')\n        cdd_m1 = self._p(m1, 'cdd')\n        cdd_m2 = self._p(m2, 'cdd')\n        cdd_m3 = self._p(m3, 'cdd')\n        cgd_m0 = self._p(m0, 'cgd')\n        cgd_m1 = self._p(m1, 'cgd')\n        cgd_m2 = self._p(m2, 'cgd')\n        cgd_m3 = self._p(m3, 'cgd')\n        cgs_m1 = self._p(m1, 'cgs')\n        cgs_m3 = self._p(m3, 'cgs')\n        cgg_m1 = self._p(m1, 'cgg')\n        cgg_m3 = self._p(m3, 'cgg')\n\n        try:\n            C_load_f = float(C_load)\n        except (TypeError, ValueError):\n            C_load_f = 0.0\n        try:\n            Vdd_f = float(Vdd)\n        except (TypeError, ValueError):\n            Vdd_f = 1.0\n        try:\n            Vss_f = float(Vss)\n        except (TypeError, ValueError):\n            Vss_f = 0.0\n\n        results = {}\n\n        # SECTION B: Metric calculations in SI units unless the metric name explicitly states dB or V/us.\n        mirror_den = max(gm_m1 + gds_m1 + gds_m0, EPS)\n        mirror_gain = gm_m3 / mirror_den\n        Gm_eff = 0.5 * (gm_m2 + gm_m0 * mirror_gain)\n        G_out_total = max(gds_m2 + gds_m3, EPS)\n        Av0 = Gm_eff / G_out_total\n        results['DC_Gain_dB'] = 20.0 * math.log10(max(abs(Av0), EPS))\n        print('DC_Gain_dB:', results['DC_Gain_dB'])\n\n        C_out = max(C_load_f + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3 * (1.0 + abs(mirror_gain)), EPS)\n        results['Bandwidth_3dB_Hz'] = G_out_total / (2.0 * math.pi * C_out)\n        print('Bandwidth_3dB_Hz:', results['Bandwidth_3dB_Hz'])\n\n        results['UGB_Hz'] = abs(Av0) * results['Bandwidth_3dB_Hz']\n        print('UGB_Hz:', results['UGB_Hz'])\n\n        C_net3 = max(cdd_m0 + cdd_m1 + cgd_m0 + cgd_m1 + cgs_m1 + cgs_m3 + cgg_m1 + cgg_m3, EPS)\n        f_p2 = max((gm_m1 + gds_m1 + gds_m0) / (2.0 * math.pi * C_net3), EPS)\n        phase_lag_deg = (math.atan(results['UGB_Hz'] / max(results['Bandwidth_3dB_Hz'], EPS)) + math.atan(results['UGB_Hz'] / f_p2)) * 180.0 / math.pi\n        results['Phase_Margin_deg'] = self._clamp(180.0 - phase_lag_deg, 0.0, 180.0)\n        print('Phase_Margin_deg:', results['Phase_Margin_deg'])\n\n        phase_cross_gain = 0.0\n        results['Gain_Margin_dB'] = 20.0 * math.log10(abs(1.0 / max(abs(phase_cross_gain), EPS)))\n        print('Gain_Margin_dB:', results['Gain_Margin_dB'])\n\n        input_cmr_min = Vss_f + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0)\n        results['Input_CMR_Min_V'] = self._clamp(input_cmr_min, Vss_f, Vdd_f)\n        print('Input_CMR_Min_V:', results['Input_CMR_Min_V'])\n\n        input_cmr_max_m0 = Vdd_f - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)\n        input_cmr_max_m2 = Vdd_f - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)\n        results['Input_CMR_Max_V'] = self._clamp(min(input_cmr_max_m0, input_cmr_max_m2), Vss_f, Vdd_f)\n        print('Input_CMR_Max_V:', results['Input_CMR_Max_V'])\n\n        output_swing_max = Vdd_f - max(abs(vdsat_m3), 0.0)\n        results['Output_Swing_Max_V'] = self._clamp(output_swing_max, Vss_f, Vdd_f)\n        print('Output_Swing_Max_V:', results['Output_Swing_Max_V'])\n\n        output_swing_min = Vss_f + max(abs(vdsat_m4), 0.0) + max(abs(vdsat_m2), 0.0)\n        results['Output_Swing_Min_V'] = self._clamp(output_swing_min, Vss_f, Vdd_f)\n        print('Output_Swing_Min_V:', results['Output_Swing_Min_V'])\n\n        C_slew = max(C_load_f + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3, EPS)\n        results['Slew_Rate_Pos_V_us'] = (abs(id_m3) / C_slew) / 1e6\n        print('Slew_Rate_Pos_V_us:', results['Slew_Rate_Pos_V_us'])\n\n        results['Slew_Rate_Neg_V_us'] = (min(abs(id_m2), abs(id_m4)) / C_slew) / 1e6\n        print('Slew_Rate_Neg_V_us:', results['Slew_Rate_Neg_V_us'])\n\n        A_vdd = (gds_m3 + gm_m3 * gds_m1 / mirror_den) / G_out_total\n        results['PSRR_Pos_dB'] = 20.0 * math.log10(max(abs(Av0 / max(abs(A_vdd), EPS)), EPS))\n        print('PSRR_Pos_dB:', results['PSRR_Pos_dB'])\n\n        A_vss = (gds_m4 / max(gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4, EPS)) * (gds_m2 / G_out_total)\n        results['PSRR_Neg_dB'] = 20.0 * math.log10(max(abs(Av0 / max(abs(A_vss), EPS)), EPS))\n        print('PSRR_Neg_dB:', results['PSRR_Neg_dB'])\n\n        Acm_mirror = abs(gm_m2 - gm_m0 * mirror_gain) / G_out_total\n        Acm_tail = (gds_m4 / max(gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4, EPS)) * abs(Av0)\n        Acm_total = Acm_mirror + Acm_tail\n        results['CMRR_dB'] = 20.0 * math.log10(max(abs(Av0 / max(abs(Acm_total), EPS)), EPS))\n        print('CMRR_dB:', results['CMRR_dB'])\n\n        return results\n\n\nif __name__ == '__main__':\n    mock_params = {\n        'm0': get_default_lut_row(),\n        'm1': get_default_lut_row(),\n        'm2': get_default_lut_row(),\n        'm3': get_default_lut_row(),\n        'm4': get_default_lut_row(),\n        'm5': get_default_lut_row()\n    }\n\n    model = PerformanceModel()\n    output = model.compute(device_params=mock_params, C_load=1e-12, Vdd=1.0, Vss=0.0)\n\n    print('\\nReadable display:')\n    for metric, value in output.items():\n        print(f'{metric}: {value}')\n"
+  }
+}

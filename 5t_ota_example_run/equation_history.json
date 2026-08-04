@@ -1,0 +1,641 @@
+{
+    "Stage 1": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.25
+        },
+        "Gain_Margin_dB": {
+            "equation": "20 * math.log10(abs(1.0 / max(0.0, 1e-18)))",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0)",
+            "is_balanced": true,
+            "error_pct": -6.74
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max(abs(vdsat_m3), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": 141.34
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "(abs(id_m3) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -37.59
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "(min(abs(id_m2), abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -32.9
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * gds_m1 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 15.21
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 15.14
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -63.43
+        }
+    },
+    "Stage 2": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + max(abs(vdsat_m0), abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": 11.62
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max(abs(vdsat_m3), abs(vdsat_m1) * max((gm_m3 + gds_m3), 1e-18) / max((gm_m1 + gds_m1 + gds_m0), 1e-18), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "((abs(id_m3) + abs(id_m1)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 24.82
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 101.3
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * (gds_m1 + gds_m0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -10.57
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -16.45
+        }
+    },
+    "Stage 3": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max(gds_m4, 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18))",
+            "is_balanced": true,
+            "error_pct": -6.02
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + max((abs(vgs_m3) - abs(vgs_m1)), 0.0)), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 17.71
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "(min(abs(id_m2), abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -32.9
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * (gds_m1 + gds_m0) / max((gm_m1 + gmb_m3 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -8.4
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -19.12
+        }
+    },
+    "Stage 4": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))",
+            "is_balanced": true,
+            "error_pct": -5.15
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + (max((abs(vgs_m3) - abs(vgs_m1)), 0.0) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "(max((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) - (abs(id_m2) * max(gds_m2, 0.0) / max((gds_m2 + gds_m3), 1e-18))), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -21.89
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * (gds_m1 + gds_m0) / max((gm_m1 + gds_m1 + gds_m0 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -9.33
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": 5.62
+        }
+    },
+    "Stage 5": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 2.86
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + (max((abs(vgs_m3) - abs(vgs_m1)), 0.0) * max((gm_m3 + gmb_m3), 0.0) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3), 1e-18))), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "((abs(id_m3) + (abs(id_m1) * max((gm_m3 + gmb_m3), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) - (abs(id_m2) * max(gds_m2, 0.0) / max((gm_m2 + gds_m2 + gds_m3), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 18.91
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 5.88
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) + gds_m0 + gds_m2) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + (((gds_m4 + gds_m0 + gds_m2) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -57.62
+        }
+    },
+    "Stage 6": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 2.86
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max(abs(vdsat_m3), max((abs(vgs_m3) - abs(vth_m3)), 0.0), 0.0)",
+            "is_balanced": true,
+            "error_pct": 8.08
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 17.73
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0 + gds_m3) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -1.75
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + (((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -10.4
+        }
+    },
+    "Stage 7": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 2.86
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + abs(vdsat_m2)), 0.0)",
+            "is_balanced": true,
+            "error_pct": -1.62
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "(max(((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) - abs(id_m2)), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -44.7
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0 + gds_m3) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -1.75
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": 5.62
+        }
+    },
+    "Stage 8": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 2.86
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + abs(vdsat_m2)), 0.0)",
+            "is_balanced": true,
+            "error_pct": -1.62
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "(max(((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) - (abs(id_m2) * max(gds_m2, 0.0) / max((gds_m2 + gds_m3), 1e-18))), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -21.89
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0 + gds_m3) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -1.75
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + (((gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -3.12
+        }
+    },
+    "Stage 9": {
+        "DC_Gain_dB": {
+            "equation": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -1.46
+        },
+        "Bandwidth_3dB_Hz": {
+            "equation": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 4.85
+        },
+        "UGB_Hz": {
+            "equation": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": 1.53
+        },
+        "Phase_Margin_deg": {
+            "equation": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+            "is_balanced": true,
+            "error_pct": 0.01
+        },
+        "Gain_Margin_dB": {
+            "equation": "360.0",
+            "is_balanced": true
+        },
+        "Input_CMR_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + (max(abs(vdsat_m0), abs(vdsat_m2), 0.0) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gds_m4 + gds_m0 + gds_m2 + ((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) * max((gds_m4 + gds_m0 + gds_m2), 0.0) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18))",
+            "is_balanced": true,
+            "error_pct": 2.86
+        },
+        "Input_CMR_Max_V": {
+            "equation": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+            "is_balanced": true,
+            "error_pct": 4.37
+        },
+        "Output_Swing_Max_V": {
+            "equation": "Vdd - max((abs(vdsat_m3) + abs(vdsat_m2)), 0.0)",
+            "is_balanced": true,
+            "error_pct": -1.62
+        },
+        "Output_Swing_Min_V": {
+            "equation": "Vss + max(abs(vdsat_m2), 0.0)",
+            "is_balanced": true,
+            "error_pct": -3.73
+        },
+        "Slew_Rate_Pos_V_us": {
+            "equation": "(max(((abs(id_m3) + (abs(id_m1) * max(gm_m3, 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) - (abs(id_m2) * max(gds_m2, 0.0) / max((gds_m2 + gds_m3), 1e-18) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))), 0.0) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": 0.72
+        },
+        "Slew_Rate_Neg_V_us": {
+            "equation": "((abs(id_m2) + max((abs(id_m4) - abs(id_m0)), 0.0) * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+            "is_balanced": true,
+            "error_pct": -4.12
+        },
+        "PSRR_Pos_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + ((gm_m3 + gmb_m3) * (gds_m1 + gds_m0 + gds_m3) / max((gm_m1 + gds_m1 + gds_m0 + gm_m3 + gmb_m3 + gds_m3), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -1.75
+        },
+        "PSRR_Neg_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+            "is_balanced": true,
+            "error_pct": -3.71
+        },
+        "CMRR_dB": {
+            "equation": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) * max((gds_m1 + gds_m0), 0.0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18)) + (((gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + (gmb_m4 * max(gds_m4, 0.0) / max((gds_m4 + gds_m0 + gds_m2), 1e-18))), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+            "is_balanced": true,
+            "error_pct": -3.12
+        }
+    }
+}

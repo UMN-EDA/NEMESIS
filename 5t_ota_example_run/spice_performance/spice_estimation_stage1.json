@@ -1,0 +1,23 @@
+{
+    "timestamp": "2026-08-04 09:55:28",
+    "global_parameters": {},
+    "extracted_metrics": {
+        "ICMR Min (V)": 0.4212337,
+        "ICMR Max (V)": 0.7882109,
+        "ICMR Mid (V)": 0.6047223,
+        "Power (Watts)": 1.2729e-05,
+        "Output Swing Min (V)": 0.08030029999999999,
+        "Output Swing Max (V)": 0.7963689,
+        "DC Gain (dB)": 20.226,
+        "UGF (Hz)": 20144300.0,
+        "Phase Margin (deg)": 95.4331,
+        "Gain Margin (dB)": "FAILED",
+        "Bandwidth 3dB (Hz)": 1966400.0,
+        "Slew Rate (+) (V/us)": 12.3738,
+        "Slew Rate (-) (V/us)": 11.5095,
+        "Peak Output Current (A)": "None",
+        "PSRR- (dB)": 45.1929,
+        "CMRR (dB)": 43.5457,
+        "PSRR+ (dB)": 20.1055
+    }
+}

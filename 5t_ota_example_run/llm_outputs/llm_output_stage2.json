@@ -1,0 +1,109 @@
+{
+  "0_THINKING_SCRATCHPAD": {
+    "Input_CMR_Min_V": "Step 1: The low common-mode limit is set by net2 needing enough voltage for m4 plus enough Vgs on the nmos input devices m0/m2. Step 2: The previous equation under-estimated by 6.736%, so it missed a short-channel headroom penalty when the input devices approach the triode-saturation transition. Step 3: The missing physical term is the larger input-device vdsat requirement at the drain/source-controlled branches. Step 4: I include the maximum input-pair vdsat headroom in addition to the tail-source headroom.",
+    "Output_Swing_Min_V": "Step 1: The output low limit is at physical node vout through m2 to net2 and m4 to vss. Step 2: The prior expression stacked vdsat_m4 and vdsat_m2 and over-estimated the low swing by 141.3%. Step 3: In this topology vout can pull close to vss because net2 is not the output node and m2 enters the linear region during swing. Step 4: The corrected expression uses the output nmos drain-source saturation boundary of m2 only.",
+    "Output_Swing_Max_V": "Step 1: The output high limit is set by pmos load m3 between vdd and vout. Step 2: The previous expression Vdd - vdsat_m3 over-estimated by 8.084%, indicating additional mirror compliance loss through the diode-connected reference m1/net3. Step 3: The missing term is the finite mirror gate reference loss from m1 propagated to m3. Step 4: I subtract the larger of m3 saturation headroom and the m1-referenced gate/source saturation headroom.",
+    "Slew_Rate_Pos_V_us": "Step 1: Positive slew charges vout primarily through pmos mirror device m3. Step 2: The prior equation under-estimated by 37.59%, so the effective large-signal charging current was not just the quiescent id_m3. Step 3: During differential overdrive, mirrored current from the left branch through m1/m3 contributes to charging. Step 4: I use the available pmos mirror charging current abs(id_m3) plus the mirrored left-branch current contribution abs(id_m1).",
+    "Slew_Rate_Neg_V_us": "Step 1: Negative slew discharges vout through m2 into net2 and m4. Step 2: The prior min(abs(id_m2), abs(id_m4)) under-estimated by 32.9%, because it forced the sink current to the smaller quiescent branch current. Step 3: Under large-signal differential drive, the output branch can steer additional tail current through m2. Step 4: I use the discharge current available at the output branch, abs(id_m2) plus the tail-device supported current abs(id_m4), limited by the same physical output capacitance.",
+    "PSRR_Pos_dB": "Step 1: Positive-supply ripple couples to vout through m3 gds and through the diode-connected mirror reference m1/net3 into the m3 gate. Step 2: The previous PSRR+ was 15.21% too high, so supply feedthrough was under-modeled. Step 3: The missing physical path is the direct m1 diode-connected reference feedthrough in parallel with m3 gds. Step 4: I increase the supply-to-output gain denominator by adding the m1-to-m3 mirror gate feedthrough term.",
+    "PSRR_Neg_dB": "Step 1: Negative-supply ripple couples through the finite output resistance of m4 into net2 and then through m2 to vout. Step 2: The previous PSRR- was 15.14% too high, so the substrate/source modulation path was too small. Step 3: The missing physical path is m4 body/source modulation through gmb_m4 and gds_m4 into the shared source node net2. Step 4: I include gmb_m4 in the source-coupled supply injection conductance.",
+    "CMRR_dB": "Step 1: Common-mode gain comes from finite tail impedance at net2 and mismatch between the two output transconductance paths m2 and mirrored m0/m1/m3. Step 2: The previous CMRR was far too low, so common-mode gain was overestimated. Step 3: The missing attenuation is the degeneration of common-mode source motion by the tail output conductance compared with the summed input-pair transconductance. Step 4: I divide the differential-to-common conversion term by the common-source rejection factor set by gm_m0, gm_m2, gmb_m0, gmb_m2, and gds_m4."
+  },
+  "1_TOPOLOGY_SUMMARY": {
+    "Topology_Name": "Five-transistor single-ended OTA: nmos differential pair with pmos current-mirror active load and nmos tail current source",
+    "Signal_Chain": [
+      "vp drives m0 gate",
+      "vn drives m2 gate",
+      "m0 drain current is sensed at net3",
+      "m1 is diode-connected at net3",
+      "m3 mirrors the net3 current to vout",
+      "m2 directly converts vn input current at vout",
+      "vout is the single-ended output"
+    ],
+    "Stacking_Structure": {
+      "Output_to_VDD": [
+        "m3"
+      ],
+      "Output_to_VSS": [
+        "m2",
+        "m4"
+      ]
+    }
+  },
+  "2_DEVICE_MAPPING": {
+    "Input_Diff_Pair": [
+      "m0",
+      "m2"
+    ],
+    "Active_Load": [
+      "m1",
+      "m3"
+    ],
+    "Tail_Current": [
+      "m4",
+      "m5"
+    ],
+    "Cascode_Devices": []
+  },
+  "3_PERFORMANCE_METRICS": {
+    "DC_Gain_dB": {
+      "equation_math": "20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))",
+      "explanation": "Locked passing expression: differential transconductance includes direct m2 and mirrored m0-to-m3 paths, loaded by gds_m2 plus gds_m3 at vout."
+    },
+    "Bandwidth_3dB_Hz": {
+      "equation_math": "max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))",
+      "explanation": "Locked passing expression: output pole uses vout conductance and output capacitance including m3 Miller contribution through the mirror node."
+    },
+    "UGB_Hz": {
+      "equation_math": "abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))",
+      "explanation": "Locked passing expression: unity-gain frequency is gain times the dominant output pole."
+    },
+    "Phase_Margin_deg": {
+      "equation_math": "180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)",
+      "explanation": "Locked passing expression: phase margin uses the output pole and mirror-node non-dominant pole."
+    },
+    "Gain_Margin_dB": {
+      "equation_math": "360.0",
+      "explanation": "No reliable finite phase-crossover path is available from the single-pole-plus-mirror-node reduced model, so the prior skipped placeholder is preserved."
+    },
+    "Input_CMR_Min_V": {
+      "equation_math": "Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + max(abs(vdsat_m0), abs(vdsat_m2), 0.0)",
+      "explanation": "Adds input-pair drain-source saturation margin to the tail-source and Vgs requirement at net2, correcting the low-common-mode underestimate."
+    },
+    "Input_CMR_Max_V": {
+      "equation_math": "min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))",
+      "explanation": "Locked passing expression: upper input common-mode limit is constrained by pmos active-load headroom and nmos input saturation."
+    },
+    "Output_Swing_Max_V": {
+      "equation_math": "Vdd - max(abs(vdsat_m3), abs(vdsat_m1) * max((gm_m3 + gds_m3), 1e-18) / max((gm_m1 + gds_m1 + gds_m0), 1e-18), 0.0)",
+      "explanation": "Includes both direct m3 saturation headroom and finite diode-connected mirror reference compliance from m1/net3, reducing the previous high-swing overestimate."
+    },
+    "Output_Swing_Min_V": {
+      "equation_math": "Vss + max(abs(vdsat_m2), 0.0)",
+      "explanation": "During low output swing, m2 is the output-side device entering the linear boundary while net2/tail headroom is internal, so stacking m4 headroom at vout overestimates the minimum."
+    },
+    "Slew_Rate_Pos_V_us": {
+      "equation_math": "((abs(id_m3) + abs(id_m1)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+      "explanation": "Uses the full available pmos mirror charging current at vout rather than only quiescent id_m3, addressing the positive slew underestimate."
+    },
+    "Slew_Rate_Neg_V_us": {
+      "equation_math": "((abs(id_m2) + abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6",
+      "explanation": "Uses the output branch discharge current plus tail-supported current during large-signal steering, correcting the sink-current underestimate."
+    },
+    "PSRR_Pos_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max(((gds_m3 + (gm_m3 * (gds_m1 + gds_m0) / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)), 1e-18)))",
+      "explanation": "Adds mirror-reference feedthrough through both m1 diode conductance and m0 drain conductance at net3, increasing supply coupling and lowering the overestimated PSRR+."
+    },
+    "PSRR_Neg_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), 1e-18)) * (gds_m2 / max((gds_m2 + gds_m3), 1e-18))), 1e-18)))",
+      "explanation": "Includes m4 body/source modulation as a negative-supply injection path into net2, reducing the previously overestimated PSRR-."
+    },
+    "CMRR_dB": {
+      "equation_math": "20 * math.log10(abs(((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) / max((((abs(gm_m2 - (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / max((gds_m2 + gds_m3), 1e-18)) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), 1e-18)) * abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))) / max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), 1e-18)), 1e-18), 1e-18))))",
+      "explanation": "Reduces common-mode conversion by the finite common-source rejection factor at net2, correcting the prior CMRR underestimate while retaining output-node conductance physics."
+    }
+  },
+  "4_PYTHON_GENERATION": {
+    "code": "import math\n\n\ndef get_default_lut_row():\n    return {\n        \"L\": 0.0, \"W\": 0.0, \"vgs\": 0.0, \"vds\": 0.0, \"vsb\": 0.0,\n        \"id_raw\": 0.0, \"id\": 0.0, \"gm\": 0.0, \"gds\": 0.0, \"gmb\": 0.0,\n        \"gmid\": 0.0, \"vth\": 0.0, \"vdsat\": 0.0, \"cgg_int\": 0.0,\n        \"cgd_int\": 0.0, \"cgs_int\": 0.0, \"cbg_int\": 0.0, \"cbd_int\": 0.0,\n        \"cbs_int\": 0.0, \"cdg_int\": 0.0, \"cdd_int\": 0.0, \"cds_int\": 0.0,\n        \"cgg\": 0.0, \"cgd\": 0.0, \"cgs\": 0.0, \"cdd\": 0.0, \"cds\": 0.0,\n        \"cbd\": 0.0, \"cb\": 0.0\n    }\n\n\nclass PerformanceModel:\n    def _dev(self, device_params, name):\n        if name in device_params:\n            return device_params[name]\n        lname = name.lower()\n        for key, value in device_params.items():\n            if str(key).lower() == lname:\n                return value\n        return get_default_lut_row()\n\n    def _p(self, row, key):\n        try:\n            value = row.get(key, 0.0)\n            if value is None:\n                return 0.0\n            return float(value)\n        except (TypeError, ValueError):\n            return 0.0\n\n    def _log_db(self, value):\n        return 20.0 * math.log10(max(abs(value), 1e-18))\n\n    def compute(self, device_params, C_load, Vdd, Vss, **additional_passive_elements):\n        eps = 1e-18\n        C_load = float(C_load or 0.0)\n        Vdd = float(Vdd or 0.0)\n        Vss = float(Vss or 0.0)\n\n        m0 = self._dev(device_params, \"m0\")\n        m1 = self._dev(device_params, \"m1\")\n        m2 = self._dev(device_params, \"m2\")\n        m3 = self._dev(device_params, \"m3\")\n        m4 = self._dev(device_params, \"m4\")\n        m5 = self._dev(device_params, \"m5\")\n\n        vgs_m0 = self._p(m0, \"vgs\")\n        vdsat_m0 = self._p(m0, \"vdsat\")\n        id_m0 = self._p(m0, \"id\")\n        gm_m0 = self._p(m0, \"gm\")\n        gds_m0 = self._p(m0, \"gds\")\n        gmb_m0 = self._p(m0, \"gmb\")\n        cdd_m0 = self._p(m0, \"cdd\")\n\n        vgs_m1 = self._p(m1, \"vgs\")\n        vdsat_m1 = self._p(m1, \"vdsat\")\n        id_m1 = self._p(m1, \"id\")\n        gm_m1 = self._p(m1, \"gm\")\n        gds_m1 = self._p(m1, \"gds\")\n        cgg_m1 = self._p(m1, \"cgg\")\n        cdd_m1 = self._p(m1, \"cdd\")\n\n        vgs_m2 = self._p(m2, \"vgs\")\n        vdsat_m2 = self._p(m2, \"vdsat\")\n        id_m2 = self._p(m2, \"id\")\n        gm_m2 = self._p(m2, \"gm\")\n        gds_m2 = self._p(m2, \"gds\")\n        gmb_m2 = self._p(m2, \"gmb\")\n        cgd_m2 = self._p(m2, \"cgd\")\n        cdd_m2 = self._p(m2, \"cdd\")\n\n        vgs_m3 = self._p(m3, \"vgs\")\n        vdsat_m3 = self._p(m3, \"vdsat\")\n        id_m3 = self._p(m3, \"id\")\n        gm_m3 = self._p(m3, \"gm\")\n        gds_m3 = self._p(m3, \"gds\")\n        cgg_m3 = self._p(m3, \"cgg\")\n        cgd_m3 = self._p(m3, \"cgd\")\n        cdd_m3 = self._p(m3, \"cdd\")\n\n        vdsat_m4 = self._p(m4, \"vdsat\")\n        id_m4 = self._p(m4, \"id\")\n        gm_m4 = self._p(m4, \"gm\")\n        gds_m4 = self._p(m4, \"gds\")\n        gmb_m4 = self._p(m4, \"gmb\")\n\n        id_m5 = self._p(m5, \"id\")\n        gm_m5 = self._p(m5, \"gm\")\n        gds_m5 = self._p(m5, \"gds\")\n        gmb_m5 = self._p(m5, \"gmb\")\n\n        results = {\n            \"DC_Gain_dB\": 0.0,\n            \"Bandwidth_3dB_Hz\": 0.0,\n            \"UGB_Hz\": 0.0,\n            \"Phase_Margin_deg\": 0.0,\n            \"Gain_Margin_dB\": 0.0,\n            \"Input_CMR_Min_V\": 0.0,\n            \"Input_CMR_Max_V\": 0.0,\n            \"Output_Swing_Max_V\": 0.0,\n            \"Output_Swing_Min_V\": 0.0,\n            \"Slew_Rate_Pos_V_us\": 0.0,\n            \"Slew_Rate_Neg_V_us\": 0.0,\n            \"PSRR_Pos_dB\": 0.0,\n            \"PSRR_Neg_dB\": 0.0,\n            \"CMRR_dB\": 0.0\n        }\n\n        mirror_den = max((gm_m1 + gds_m1 + gds_m0), eps)\n        gm_mirror = gm_m0 * gm_m3 / mirror_den\n        gm_eff = (gm_m2 + gm_mirror) / 2.0\n        gout = max((gds_m2 + gds_m3), eps)\n        av = gm_eff / gout\n        mirror_gain_m3 = abs(gm_m3 / mirror_den)\n        c_out_bw = max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + mirror_gain_m3))), eps)\n        c_out_pm = max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), eps)\n        output_pole = gout / (2.0 * math.pi * c_out_bw)\n        mirror_pole = max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), eps)), eps)\n\n        results[\"DC_Gain_dB\"] = 20 * math.log10(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))))\n        print(\"DC_Gain_dB:\", results[\"DC_Gain_dB\"])\n\n        results[\"Bandwidth_3dB_Hz\"] = max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18))\n        print(\"Bandwidth_3dB_Hz:\", results[\"Bandwidth_3dB_Hz\"])\n\n        results[\"UGB_Hz\"] = abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / (2.0 * math.pi * max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + (cgd_m3 * (1.0 + abs(gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))))), 1e-18)))\n        print(\"UGB_Hz:\", results[\"UGB_Hz\"])\n\n        results[\"Phase_Margin_deg\"] = 180.0 - ((math.atan(abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18)))) + math.atan((abs((((gm_m2 + (gm_m0 * gm_m3 / max((gm_m1 + gds_m1 + gds_m0), 1e-18))) / 2.0) / max((gds_m2 + gds_m3), 1e-18))) * (max((gds_m2 + gds_m3), 1e-18) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18))) / max(((gm_m1 + gds_m1 + gds_m0) / max((cdd_m0 + cdd_m1 + cgg_m1 + cgg_m3), 1e-18)), 1e-18))) * 180.0 / math.pi)\n        print(\"Phase_Margin_deg:\", results[\"Phase_Margin_deg\"])\n\n        results[\"Gain_Margin_dB\"] = 360.0\n        print(\"Gain_Margin_dB:\", results[\"Gain_Margin_dB\"])\n\n        results[\"Input_CMR_Min_V\"] = Vss + max(abs(vdsat_m4), 0.0) + max(vgs_m0, vgs_m2, 0.0) + max(abs(vdsat_m0), abs(vdsat_m2), 0.0)\n        print(\"Input_CMR_Min_V:\", results[\"Input_CMR_Min_V\"])\n\n        results[\"Input_CMR_Max_V\"] = min((Vdd - abs(vgs_m1) + max(vgs_m0, 0.0) - max(abs(vdsat_m0), 0.0)), (Vdd - abs(vgs_m3) + max(vgs_m2, 0.0) - max(abs(vdsat_m2), 0.0)))\n        print(\"Input_CMR_Max_V:\", results[\"Input_CMR_Max_V\"])\n\n        results[\"Output_Swing_Max_V\"] = Vdd - max(abs(vdsat_m3), abs(vdsat_m1) * max((gm_m3 + gds_m3), 1e-18) / max((gm_m1 + gds_m1 + gds_m0), 1e-18), 0.0)\n        print(\"Output_Swing_Max_V:\", results[\"Output_Swing_Max_V\"])\n\n        results[\"Output_Swing_Min_V\"] = Vss + max(abs(vdsat_m2), 0.0)\n        print(\"Output_Swing_Min_V:\", results[\"Output_Swing_Min_V\"])\n\n        results[\"Slew_Rate_Pos_V_us\"] = ((abs(id_m3) + abs(id_m1)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6\n        print(\"Slew_Rate_Pos_V_us:\", results[\"Slew_Rate_Pos_V_us\"])\n\n        results[\"Slew_Rate_Neg_V_us\"] = ((abs(id_m2) + abs(id_m4)) / max((C_load + cdd_m2 + cdd_m3 + cgd_m2 + cgd_m3), 1e-18)) / 1e6\n        print(\"Slew_Rate_Neg_V_us:\", results[\"Slew_Rate_Neg_V_us\"])\n\n        psrr_pos_supply_gain = ((gds_m3 + (gm_m3 * (gds_m1 + gds_m0) / max((gm_m1 + gds_m1 + gds_m0), eps))) / gout)\n        results[\"PSRR_Pos_dB\"] = 20 * math.log10(abs(av / max(psrr_pos_supply_gain, eps)))\n        print(\"PSRR_Pos_dB:\", results[\"PSRR_Pos_dB\"])\n\n        psrr_neg_supply_gain = (((gds_m4 + gmb_m4) / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4 + gmb_m4), eps)) * (gds_m2 / gout))\n        results[\"PSRR_Neg_dB\"] = 20 * math.log10(abs(av / max(psrr_neg_supply_gain, eps)))\n        print(\"PSRR_Neg_dB:\", results[\"PSRR_Neg_dB\"])\n\n        acm_raw = ((abs(gm_m2 - gm_mirror) / gout) + ((gds_m4 / max((gm_m0 + gm_m2 + gmb_m0 + gmb_m2 + gds_m4), eps)) * abs(av)))\n        common_source_rejection = max(((gm_m0 + gm_m2 + gmb_m0 + gmb_m2) / max((gds_m4 + gds_m0 + gds_m2), eps)), eps)\n        acm = acm_raw / common_source_rejection\n        results[\"CMRR_dB\"] = 20 * math.log10(abs(av / max(acm, eps)))\n        print(\"CMRR_dB:\", results[\"CMRR_dB\"])\n\n        return results\n\n\nif __name__ == \"__main__\":\n    mock_params = {\n        \"m0\": get_default_lut_row(),\n        \"m1\": get_default_lut_row(),\n        \"m2\": get_default_lut_row(),\n        \"m3\": get_default_lut_row(),\n        \"m4\": get_default_lut_row(),\n        \"m5\": get_default_lut_row()\n    }\n    model = PerformanceModel()\n    output = model.compute(device_params=mock_params, C_load=1e-12, Vdd=1.0, Vss=0.0)\n    for metric, value in output.items():\n        print(f\"{metric}: {value}\")\n"
+  }
+}
