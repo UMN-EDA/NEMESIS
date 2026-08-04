@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEMESIS | OTA Modeling With SPICE Verification</title>
+    <meta
+      name="description"
+      content="NEMESIS documentation for LLM-aided OTA performance modeling with gm/Id sizing and HSPICE verification."
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand" href="#top" aria-label="NEMESIS home">NEMESIS</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <div class="nav-links" id="site-nav">
+          <a href="#flow">Flow</a>
+          <a href="#workflow">Script Steps</a>
+          <a href="#universal">Universal Assets</a>
+          <a href="#adapt">Modify for Circuits</a>
+          <a href="#usage">Usage</a>
+        </div>
+      </nav>
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">LLM-aided analog performance modeling</p>
+          <h1>NEMESIS</h1>
+          <p class="lead">
+            A framework for generating compact OTA performance models with large-language-model
+            reasoning, gm/Id lookup-table sizing, and closed-loop HSPICE verification.
+          </p>
+          <div class="hero-actions" aria-label="Page shortcuts">
+            <a class="button primary" href="#flow">View the flow</a>
+            <a class="button secondary" href="#workflow">Read every step</a>
+          </div>
+        </div>
+        <div class="hero-panel" aria-label="Framework summary">
+          <div class="metric">
+            <span class="metric-value">17</span>
+            <span class="metric-label">driver operations</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">9</span>
+            <span class="metric-label">verification views</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">5</span>
+            <span class="metric-label">reference OTA netlists</span>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section class="section intro" id="overview">
+        <div class="section-heading">
+          <p class="eyebrow">What the framework does</p>
+          <h2>Model equations are accepted only after simulator-backed closure.</h2>
+        </div>
+        <div class="intro-grid">
+          <article>
+            <h3>Input</h3>
+            <p>
+              A SPICE OTA netlist, a topology image, universal HSPICE testbenches, and design
+              targets such as supply voltage, bias current, load capacitance, and design intent.
+            </p>
+          </article>
+          <article>
+            <h3>Core Loop</h3>
+            <p>
+              NEMESIS prompts an LLM to propose symbolic performance equations, compiles them into
+              executable Python, sizes devices through gm/Id data, and validates performance using
+              HSPICE.
+            </p>
+          </article>
+          <article>
+            <h3>Output</h3>
+            <p>
+              A converged scalar OTA model, a vectorized evaluator, sized device parameters,
+              equation history, LLM outputs, and SPICE/model performance reports.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="flow">
+        <div class="section-heading">
+          <p class="eyebrow">High-level flow</p>
+          <h2>From circuit netlist to verified model</h2>
+          <p>
+            The base driver is <code>llm_aided_modelling.sh</code>. Each block below links to the
+            detailed script operation that implements it.
+          </p>
+        </div>
+        <ol class="flow-map">
+          <li><a href="#step-1"><span>1</span> Create a clean circuit workspace</a></li>
+          <li><a href="#step-2"><span>2</span> Simplify the DUT netlist for LLM context</a></li>
+          <li><a href="#step-3"><span>3</span> Generate parameter templates</a></li>
+          <li><a href="#step-4"><span>4</span> Prepare operating-point extraction</a></li>
+          <li><a href="#step-5"><span>5</span> Build gm/Id estimation prompt</a></li>
+          <li><a href="#step-6"><span>6</span> Generate target specs with the LLM</a></li>
+          <li><a href="#step-7"><span>7</span> Build the initial modeling prompt</a></li>
+          <li><a href="#loop"><span>8-16</span> Iterate model generation, sizing, SPICE, and feedback</a></li>
+          <li><a href="#step-17"><span>17</span> Vectorize the converged evaluator</a></li>
+        </ol>
+      </section>
+
+      <section class="section" id="repo-layout">
+        <div class="section-heading">
+          <p class="eyebrow">Repository map</p>
+          <h2>Where the framework expects each artifact</h2>
+        </div>
+        <div class="layout-table">
+          <div><code>llm_aided_modelling.sh</code></div>
+          <div>Main orchestration script for one OTA modeling run.</div>
+          <div><code>Universal/dut/</code></div>
+          <div>Canonical DUT netlists, named by circuit work directory such as <code>5t_ota.sp</code>.</div>
+          <div><code>Universal/otas/</code></div>
+          <div>Topology figures and reference netlists used as visual context for the LLM.</div>
+          <div><code>Universal/testbenches/</code></div>
+          <div>Reusable HSPICE decks for AC, CMRR, ICMR, OCMR, power, PSRR, slew, and operating point extraction.</div>
+          <div><code>&lt;WORK_DIR&gt;/</code></div>
+          <div>Generated run directory with prompts, LLM outputs, compiled models, sized parameters, and reports.</div>
+          <div><code>Specs/</code></div>
+          <div>Reference specification JSON files for existing topologies.</div>
+          <div><code>docs/</code></div>
+          <div>This GitHub Pages website and its self-contained assets.</div>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="section-heading">
+          <p class="eyebrow">Detailed workflow</p>
+          <h2>Every operation in <code>llm_aided_modelling.sh</code></h2>
+        </div>
+
+        <article class="step" id="step-1">
+          <div class="step-index">1</div>
+          <div>
+            <h3>Initialize a clean run directory</h3>
+            <p>
+              The script sets <code>WORK_DIR</code>, derives paths for the DUT, netlist, specs,
+              prompts, models, and reports, then removes any existing work directory with the same
+              name. It recreates subdirectories for <code>testbenches</code>, <code>netlist</code>,
+              <code>prompts</code>, <code>llm_outputs</code>, <code>ota_models</code>,
+              <code>ota_model_performance</code>, <code>spice_performance</code>, and
+              <code>specs</code>.
+            </p>
+            <p>
+              It copies the universal testbenches from <code>Universal/testbenches/</code> and the
+              selected DUT netlist from <code>Universal/dut/&lt;WORK_DIR&gt;.sp</code>.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-2">
+          <div class="step-index">2</div>
+          <div>
+            <h3>Generate a simplified netlist for LLM context</h3>
+            <p>
+              <code>generate_netlist_for_llm.py</code> extracts the <code>DUT</code> subcircuit and
+              compacts transistor lines into a cleaner representation. This reduces prompt noise
+              while preserving topology, device names, terminals, model types, and sizing
+              parameters.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-3">
+          <div class="step-index">3</div>
+          <div>
+            <h3>Create <code>design_params.sp</code></h3>
+            <p>
+              <code>generate_design_params.py</code> scans the DUT devices and creates a SPICE
+              parameter template containing width and length variables. The default script call sets
+              device length to <code>180</code>, and later sizing stages update the width values.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-4">
+          <div class="step-index">4</div>
+          <div>
+            <h3>Generate an operating-point HSPICE deck</h3>
+            <p>
+              <code>generate_op_hspice.py</code> combines the selected DUT and
+              <code>tb_op.sp</code> template into <code>tb_op_temp.sp</code>. The temporary deck is
+              formatted for reliable operating-point table extraction by Python.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-5">
+          <div class="step-index">5</div>
+          <div>
+            <h3>Build the gm/Id estimator prompt</h3>
+            <p>
+              <code>generate_gmid_estimator_agent_prompt.py</code> prepares an LLM prompt using the
+              simplified netlist plus design context: <code>Vdd</code>, <code>Vss</code>,
+              <code>ibias</code>, channel length, application class, and design intent.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-6">
+          <div class="step-index">6</div>
+          <div>
+            <h3>Run the LLM to generate specs</h3>
+            <p>
+              <code>call_codex.py</code> sends the gm/Id prompt and topology figure to the selected
+              model. The output is written to <code>&lt;WORK_DIR&gt;/specs/&lt;WORK_DIR&gt;.json</code>
+              and becomes the target file used by the sizer.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-7">
+          <div class="step-index">7</div>
+          <div>
+            <h3>Generate the first equation-model prompt</h3>
+            <p>
+              <code>generate_stage1_prompt.py</code> creates <code>prompt_stage1.txt</code> from the
+              simplified netlist. This prompt asks the LLM to produce structured performance
+              equations for the selected OTA topology.
+            </p>
+          </div>
+        </article>
+
+        <article class="step loop" id="loop">
+          <div class="step-index">8-16</div>
+          <div>
+            <h3>Iterative model generation and SPICE closure</h3>
+            <p>
+              The main loop repeats until all generated equations are within the configured error
+              threshold or <code>MAX_ITER</code> is reached. Each iteration produces stage-numbered
+              files so failures and improvements are auditable.
+            </p>
+            <div class="substeps">
+              <a href="#step-8">8. LLM equation JSON</a>
+              <a href="#step-9">9. Equation history</a>
+              <a href="#step-10">10. Compile model</a>
+              <a href="#step-11">11. gm/Id sizing</a>
+              <a href="#step-12">12. Update params</a>
+              <a href="#step-13">13. HSPICE</a>
+              <a href="#step-14">14. Extract OP</a>
+              <a href="#step-15">15. Verify model</a>
+              <a href="#step-16">16. Feedback</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="step" id="step-8">
+          <div class="step-index">8</div>
+          <div>
+            <h3>Generate candidate equations</h3>
+            <p>
+              The LLM consumes the current prompt and circuit figure, then writes
+              <code>llm_output_stageN.json</code>. If this JSON is missing, the same iteration is
+              retried without incrementing the stage counter.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-9">
+          <div class="step-index">9</div>
+          <div>
+            <h3>Update equation history</h3>
+            <p>
+              <code>extract_equations.py</code> appends the generated equations into
+              <code>equation_history.json</code>. This gives later feedback prompts memory of what
+              has already been attempted.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-10">
+          <div class="step-index">10</div>
+          <div>
+            <h3>Compile JSON equations into Python</h3>
+            <p>
+              <code>compile_ota_model_script.py</code> converts the structured JSON response into
+              <code>ota_model_stageN.py</code>, an executable scalar evaluator used by the sizing and
+              verification scripts.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-11">
+          <div class="step-index">11</div>
+          <div>
+            <h3>Run gm/Id LUT-based sizing</h3>
+            <p>
+              <code>design_sizer.py</code> evaluates the compiled model against the generated specs
+              and writes <code>ota_model_estimation_stageN.1.json</code>. With
+              <code>--optimize</code>, it searches for operating points that satisfy gm/Id and
+              saturation constraints.
+            </p>
+            <p>
+              If the model crashes or fails to size, <code>repair_model.py</code> sends the sizer
+              error log, compiled model, and optional topology image back through the LLM. The
+              repaired JSON is recompiled and retried up to <code>MAX_MODEL_REPAIR_ATTEMPTS</code>.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-12">
+          <div class="step-index">12</div>
+          <div>
+            <h3>Write sized parameters back to SPICE</h3>
+            <p>
+              <code>update_design_params.py</code> maps the gm/Id sizing result into
+              <code>design_params_updated.sp</code>. This file drives the HSPICE testbenches with
+              model-derived widths and lengths.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-13">
+          <div class="step-index">13</div>
+          <div>
+            <h3>Run HSPICE characterization</h3>
+            <p>
+              <code>perform_hspice_simulations.py</code> runs the universal test plan with the
+              selected DUT, updated parameters, DUT wrapper, and local run directory. It produces a
+              JSON report and appends sweep data to <code>design_sweep_log.csv</code>.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-14">
+          <div class="step-index">14</div>
+          <div>
+            <h3>Extract transistor operating points</h3>
+            <p>
+              <code>extract_op.py</code> parses <code>run_op.lis</code> into
+              <code>op_results.json</code>. These simulator operating-point values are then supplied
+              to the model evaluator for a more direct comparison against SPICE.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-15">
+          <div class="step-index">15</div>
+          <div>
+            <h3>Re-run sizing in verification mode</h3>
+            <p>
+              <code>design_sizer.py --verify --opjson</code> evaluates the same compiled model using
+              extracted HSPICE operating-point data. The result is written as
+              <code>ota_model_estimation_stageN.2.json</code>. If verification output is missing,
+              the iteration is discarded and regenerated.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-16">
+          <div class="step-index">16</div>
+          <div>
+            <h3>Analyze mismatch and create the next prompt</h3>
+            <p>
+              <code>feedback_manager.py</code> compares HSPICE performance with equation-model
+              performance using a default <code>15.0</code> percent threshold. If all equations are
+              accurate, convergence is declared. Otherwise the script writes
+              <code>prompt_stageN+1.txt</code> with targeted feedback and continues.
+            </p>
+          </div>
+        </article>
+
+        <article class="step" id="step-17">
+          <div class="step-index">17</div>
+          <div>
+            <h3>Generate a vectorized final evaluator</h3>
+            <p>
+              After convergence, <code>vectorization_agent.py</code> converts the scalar evaluator
+              into <code>ota_model_stageN_vectorized.py</code>. The vectorized script is intended for
+              faster batched evaluation once the equation set has already passed SPICE closure.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="universal">
+        <div class="section-heading">
+          <p class="eyebrow">Universal verification</p>
+          <h2>Reusable circuits and testbenches</h2>
+          <p>
+            The <code>Universal/</code> directory makes the flow portable across OTA topologies by
+            separating DUT netlists, topology figures, and simulation templates.
+          </p>
+        </div>
+
+        <div class="gallery">
+          <figure><img src="assets/5t_ota.png" alt="5 transistor OTA topology"><figcaption>5T OTA</figcaption></figure>
+          <figure><img src="assets/2s_ota.png" alt="Two-stage OTA topology"><figcaption>Two-stage OTA</figcaption></figure>
+          <figure><img src="assets/cascode_ota.png" alt="Cascode OTA topology"><figcaption>Cascode OTA</figcaption></figure>
+          <figure><img src="assets/lv_cas_ota.png" alt="Low-voltage cascode OTA topology"><figcaption>Low-voltage cascode OTA</figcaption></figure>
+          <figure><img src="assets/cm_ota.png" alt="Current mirror OTA topology"><figcaption>Current-mirror OTA</figcaption></figure>
+        </div>
+
+        <div class="cards">
+          <article>
+            <h3>Interface adapter</h3>
+            <p>
+              <code>dut_wrapper.sp</code> exposes a common <code>DUT_UNIVERSAL</code> interface:
+              <code>vp vn vout vdd vss ibias vb2</code>. <code>DUT_HAS_VB2</code> selects whether
+              the underlying DUT consumes the extra bias pin.
+            </p>
+          </article>
+          <article>
+            <h3>Characterization decks</h3>
+            <p>
+              The current test plan covers input common-mode range, output common-mode range, AC
+              gain/UGF/phase margin, operating point, power, CMRR, PSRR+, PSRR-, and slew rate.
+            </p>
+          </article>
+          <article>
+            <h3>Run isolation</h3>
+            <p>
+              Each run copies templates into <code>&lt;WORK_DIR&gt;/testbenches</code> before editing
+              generated parameters, keeping the universal source templates reusable.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="adapt">
+        <div class="section-heading">
+          <p class="eyebrow">Adapting NEMESIS</p>
+          <h2>How to modify the flow for another circuit</h2>
+        </div>
+        <ol class="adapt-list">
+          <li>
+            <strong>Add the DUT netlist.</strong>
+            Place the SPICE netlist at <code>Universal/dut/&lt;new_work_dir&gt;.sp</code>. The main
+            subcircuit should be named <code>DUT</code>, or pass/update the subcircuit extraction
+            behavior in <code>generate_netlist_for_llm.py</code>.
+          </li>
+          <li>
+            <strong>Add a topology figure.</strong>
+            Put a matching image at <code>Universal/otas/&lt;new_work_dir&gt;.png</code>. The LLM uses
+            this as visual topology context during spec estimation, model generation, and repair.
+          </li>
+          <li>
+            <strong>Normalize the pin interface.</strong>
+            Use the universal OTA pin order <code>vp vn vout vdd vss ibias</code>, or
+            <code>vp vn vout vdd vss ibias vb2</code> when the design needs the second bias.
+            Set <code>DUT_HAS_VB2</code> and <code>VB2_DC</code> in the copied testbenches or
+            parameter templates when needed.
+          </li>
+          <li>
+            <strong>Edit script configuration.</strong>
+            In <code>llm_aided_modelling.sh</code>, update <code>WORK_DIR</code>,
+            <code>PARENT_DUT_FILE</code>, <code>NETLIST_FILE</code>, <code>SPEC_FILE_TEST</code>,
+            <code>FIGURE_FILE</code>, <code>MAX_ITER</code>, model settings, and design-context
+            arguments such as <code>Vdd</code>, <code>ibias</code>, <code>L</code>,
+            <code>application</code>, and <code>design-intent</code>.
+          </li>
+          <li>
+            <strong>Check the testbenches.</strong>
+            Verify supply names, bias direction, load capacitance, common-mode levels, sweep ranges,
+            and measurement names in <code>Universal/testbenches/</code>. Add or modify templates if
+            the new circuit needs metrics beyond the OTA test plan.
+          </li>
+          <li>
+            <strong>Run, inspect, and iterate.</strong>
+            Execute the driver, then inspect generated prompts, <code>llm_outputs</code>, model
+            performance JSON, SPICE reports, and repair logs. Persistent mismatch usually indicates
+            missing topology context, incorrect pin mapping, incomplete measurement extraction, or
+            specs that are not feasible for the selected topology.
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="usage">
+        <div class="section-heading">
+          <p class="eyebrow">Using the repository</p>
+          <h2>Basic run sequence</h2>
+        </div>
+        <div class="command-block">
+          <pre><code>python3 -m venv llm_venv
+source llm_venv/bin/activate
+pip install -r requirements.txt
+
+# Configure API credentials required by call_codex.py.
+# Make sure HSPICE is available on PATH.
+
+bash llm_aided_modelling.sh</code></pre>
+        </div>
+        <p>
+          The driver currently deletes and recreates <code>WORK_DIR</code> at the start of a run.
+          Preserve any useful generated artifacts before reusing the same work-directory name.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>NEMESIS documentation site. Source: <code>docs/</code>. Driver: <code>llm_aided_modelling.sh</code>.</p>
+      <a href="#top">Back to top</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
