@@ -21,6 +21,8 @@
           <a href="#universal">Universal Assets</a>
           <a href="#adapt">Modify for Circuits</a>
           <a href="#usage">Usage</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
         </div>
       </nav>
       <section class="hero" id="top">
@@ -34,6 +36,7 @@
           <div class="hero-actions" aria-label="Page shortcuts">
             <a class="button primary" href="#flow">View the flow</a>
             <a class="button secondary" href="#workflow">Read every step</a>
+            <a class="button secondary" href="#paper">Cite the paper</a>
           </div>
         </div>
         <div class="hero-panel" aria-label="Framework summary">
@@ -491,6 +494,92 @@ bash llm_aided_modelling.sh</code></pre>
           The driver currently deletes and recreates <code>WORK_DIR</code> at the start of a run.
           Preserve any useful generated artifacts before reusing the same work-directory name.
         </p>
+      </section>
+
+      <section class="section about-section" id="about">
+        <div class="section-heading">
+          <p class="eyebrow">About us</p>
+          <h2>NEMESIS connects LLM-derived analog equations with simulator-grounded verification.</h2>
+          <p>
+            NEMESIS was developed at the University of Minnesota as a research framework for
+            operational transconductance amplifier design automation. It focuses on making compact
+            performance models useful in practice by repeatedly checking and repairing equations
+            against HSPICE results.
+          </p>
+        </div>
+
+        <div class="about-grid">
+          <article>
+            <h3>What the paper introduces</h3>
+            <p>
+              The paper presents NEMESIS, short for NEtlist-Driven Modeling and Equation Synthesis
+              with Inversion-Aware SPICE Anchoring. Given an OTA netlist and schematic, the framework
+              identifies circuit primitives, derives performance equations, and improves those
+              equations through a SPICE-based repair loop.
+            </p>
+          </article>
+          <article>
+            <h3>Why it matters</h3>
+            <p>
+              OTA sizing often alternates between quick hand equations and slower transistor-level
+              simulation. NEMESIS keeps the speed of analytical models while anchoring them to
+              simulator data, making the generated equations more reliable across biasing ranges.
+            </p>
+          </article>
+          <article>
+            <h3>Reported results</h3>
+            <p>
+              In a commercial 65 nm PDK, the paper reports results on five OTA topologies, with
+              SPICE-verified equations achieving less than 7% average relative error and roughly
+              4622x faster post-convergence evaluation than full SPICE evaluation.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section paper-section" id="paper">
+        <div class="section-heading">
+          <p class="eyebrow">Paper citation</p>
+          <h2>Cite NEMESIS</h2>
+        </div>
+        <div class="citation-card">
+          <p>
+            Subhadip Ghosh, Ramesh Harjani, and Sachin S. Sapatnekar, "NEMESIS:
+            NEtlist-Driven Modeling and Equation Synthesis with Inversion-Aware SPICE Anchoring,"
+            arXiv:2607.05657, 2026.
+          </p>
+          <div class="citation-links" aria-label="Paper links">
+            <a href="https://arxiv.org/abs/2607.05657">arXiv</a>
+            <a href="https://doi.org/10.48550/arXiv.2607.05657">DOI</a>
+          </div>
+          <pre><code>@misc{ghosh2026nemesis,
+  title={NEMESIS: NEtlist-Driven Modeling and Equation Synthesis with Inversion-Aware SPICE Anchoring},
+  author={Ghosh, Subhadip and Harjani, Ramesh and Sapatnekar, Sachin S.},
+  year={2026},
+  eprint={2607.05657},
+  archivePrefix={arXiv},
+  primaryClass={cs.AR},
+  doi={10.48550/arXiv.2607.05657}
+}</code></pre>
+        </div>
+      </section>
+
+      <section class="section contact-section" id="contact">
+        <div class="section-heading">
+          <p class="eyebrow">Contact</p>
+          <h2>For more information</h2>
+          <p>
+            For questions about NEMESIS, implementation details, or research collaboration, contact
+            Subhadip Ghosh.
+          </p>
+        </div>
+        <div class="contact-card">
+          <div>
+            <h3>Subhadip Ghosh</h3>
+            <p>Department of Electrical and Computer Engineering, University of Minnesota</p>
+          </div>
+          <a class="contact-link" href="mailto:ghosh211@umn.edu">ghosh211@umn.edu</a>
+        </div>
       </section>
     </main>
 

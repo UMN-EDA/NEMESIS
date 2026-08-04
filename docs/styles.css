@@ -231,7 +231,8 @@ p {
 }
 
 .intro-grid,
-.cards {
+.cards,
+.about-grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -239,9 +240,12 @@ p {
 
 .intro-grid article,
 .cards article,
+.about-grid article,
 .step,
 .layout-table,
-.command-block {
+.command-block,
+.citation-card,
+.contact-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -250,19 +254,24 @@ p {
 
 .section:nth-child(even) .intro-grid article,
 .section:nth-child(even) .cards article,
+.section:nth-child(even) .about-grid article,
 .section:nth-child(even) .step,
 .section:nth-child(even) .layout-table,
-.section:nth-child(even) .command-block {
+.section:nth-child(even) .command-block,
+.section:nth-child(even) .citation-card,
+.section:nth-child(even) .contact-card {
   background: #fbfcfd;
 }
 
 .intro-grid article,
-.cards article {
+.cards article,
+.about-grid article {
   padding: 1.35rem;
 }
 
 .intro-grid h3,
-.cards h3 {
+.cards h3,
+.about-grid h3 {
   margin-bottom: 0.55rem;
 }
 
@@ -433,6 +442,56 @@ figcaption {
   overflow-x: auto;
 }
 
+.citation-card {
+  max-width: 1040px;
+  overflow-x: auto;
+  padding: 1.25rem;
+}
+
+.citation-card pre {
+  background: #f1f6f8;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.citation-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.citation-links a,
+.contact-link {
+  background: var(--accent);
+  border-radius: 6px;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+}
+
+.citation-links a:hover,
+.contact-link:hover {
+  background: var(--accent-dark);
+}
+
+.contact-card {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  max-width: 1040px;
+  padding: 1.25rem;
+}
+
+.contact-card h3 {
+  margin-bottom: 0.35rem;
+}
+
 pre {
   margin: 0;
   padding: 1.25rem;
@@ -469,6 +528,7 @@ pre code {
   .hero,
   .intro-grid,
   .cards,
+  .about-grid,
   .flow-map {
     grid-template-columns: 1fr;
   }
@@ -540,6 +600,11 @@ pre code {
   }
 
   .footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contact-card {
     align-items: flex-start;
     flex-direction: column;
   }
