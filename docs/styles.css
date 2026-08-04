@@ -893,37 +893,40 @@ pre code {
 
 .example-page .error-table {
   background: var(--surface);
-  display: grid;
-  grid-template-columns: minmax(170px, 1.5fr) repeat(9, minmax(82px, 1fr));
+  border-collapse: collapse;
   min-width: 980px;
+  table-layout: fixed;
+  width: 100%;
 }
 
-.example-page .error-table > div {
+.example-page .error-table th,
+.example-page .error-table td {
   border-bottom: 1px solid var(--line);
   padding: 0.72rem 0.65rem;
   text-align: center;
 }
 
-.example-page .error-table > div:nth-last-child(-n + 10) {
+.example-page .error-table tbody tr:last-child > * {
   border-bottom: 0;
 }
 
-.example-page .error-table .table-head {
+.example-page .error-table thead th {
   background: #eaf1f3;
   color: var(--ink);
   font-weight: 800;
 }
 
-.example-page .error-table .metric-name {
+.example-page .error-table th:first-child {
   color: var(--ink);
   font-weight: 750;
+  min-width: 170px;
   position: sticky;
   left: 0;
   text-align: left;
   z-index: 1;
 }
 
-.example-page .error-table .metric-name:not(.table-head) {
+.example-page .error-table tbody th {
   background: var(--surface);
 }
 
