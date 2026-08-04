@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEMESIS | 5T OTA Example Run</title>
+    <meta name="description" content="A file-by-file walkthrough of a nine-stage NEMESIS 5T OTA modeling and HSPICE verification run.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header compact-header" id="top">
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand" href="index.html">NEMESIS</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <div class="nav-links" id="site-nav">
+          <a href="index.html">Framework</a>
+          <a href="#story">Run Story</a>
+          <a href="#artifacts">Artifacts</a>
+          <a href="#stages">Read a Stage</a>
+          <a href="#reproduce">Reproduce</a>
+        </div>
+      </nav>
+      <section class="example-hero">
+        <div>
+          <p class="eyebrow">Worked example · preserved run</p>
+          <h1>5T OTA, stage by stage</h1>
+          <p class="lead">Follow one complete NEMESIS run from a six-device SPICE subcircuit to a stage-9 scalar model, simulator-backed convergence, and a vectorized evaluator.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#story">Follow the run</a>
+            <a class="button secondary" href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run">Browse run artifacts</a>
+          </div>
+        </div>
+        <div class="example-stats" aria-label="Example summary">
+          <div><strong>9</strong><span>modeling stages</span></div>
+          <div><strong>18</strong><span>model evaluations</span></div>
+          <div><strong>9</strong><span>SPICE reports</span></div>
+          <div><strong>1</strong><span>vectorized final model</span></div>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section class="section" id="story">
+        <div class="section-heading">
+          <p class="eyebrow">The run story</p>
+          <h2>A feedback trace, not just a collection of outputs</h2>
+          <p>The driver normally writes to <code>5t_ota/</code>. This snapshot is stored as <code>5t_ota_example_run/</code> so publishing it does not confuse it with a live workspace. The driver deletes an existing <code>WORK_DIR</code> before every run.</p>
+        </div>
+        <div class="run-pipeline" aria-label="Example artifact flow">
+          <article><span>01</span><h3>Understand</h3><p>The full DUT is simplified for LLM context, and a gm/Id agent creates the topology-aware specification.</p></article>
+          <article><span>02</span><h3>Propose</h3><p>The current prompt produces structured equations, which are recorded in history and compiled into Python.</p></article>
+          <article><span>03</span><h3>Size</h3><p>The scalar evaluator and gm/Id LUT produce a device solution and the stage's <code>.1</code> report.</p></article>
+          <article><span>04</span><h3>Measure</h3><p>Updated device parameters drive universal HSPICE decks; raw results become a stage SPICE report.</p></article>
+          <article><span>05</span><h3>Verify</h3><p>Extracted operating points feed the same model, creating the <code>.2</code> report used for comparison.</p></article>
+          <article><span>06</span><h3>Correct</h3><p>Mismatch becomes the next prompt. At stage 9 the equations pass closure and the model is vectorized.</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="artifacts">
+        <div class="section-heading">
+          <p class="eyebrow">Directory anatomy</p>
+          <h2>What every subdirectory contributes</h2>
+          <p>Each directory in the published snapshot has a local README. The table below shows its place in the dataflow.</p>
+        </div>
+        <div class="artifact-grid">
+          <article><code>netlist/</code><h3>Topology context</h3><p>The compact six-transistor DUT used by initial and feedback prompt generation.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/netlist">Directory guide</a></article>
+          <article><code>specs/</code><h3>Design intent</h3><p>Topology analysis, primitive groups, current budget, and device guidance consumed by the sizer.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/specs">Directory guide</a></article>
+          <article><code>prompts/</code><h3>Learning trajectory</h3><p>The gm/Id, initial, correction, and vectorization instructions. Stage N's prompt produces stage N's LLM output.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/prompts">Directory guide</a></article>
+          <article><code>llm_outputs/</code><h3>Equation proposals</h3><p>Nine structured responses plus the stage-9 vectorization response; these compile into executable models.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/llm_outputs">Directory guide</a></article>
+          <article><code>ota_models/</code><h3>Executable equations</h3><p>Nine scalar candidates and the final vectorized evaluator. Earlier stages remain useful for auditing.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_models">Directory guide</a></article>
+          <article><code>ota_model_performance/</code><h3>Model predictions</h3><p>Two reports per stage: <code>.1</code> for LUT sizing and <code>.2</code> for operating-point verification.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_model_performance">Directory guide</a></article>
+          <article><code>spice_performance/</code><h3>Reference truth</h3><p>Nine HSPICE characterization summaries compared with the matching model <code>.2</code> reports.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/spice_performance">Directory guide</a></article>
+          <article><code>testbenches/</code><h3>Simulation boundary</h3><p>The full DUT, universal measurement decks, baseline and updated parameters, wrapper, and run workspace.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/testbenches">Directory guide</a></article>
+          <article><code>__pycache__/</code><h3>Disposable cache</h3><p>Python bytecode only. It affects import speed, not equations, sizing, simulation, or convergence.</p><a href="https://github.com/umn-eda/NEMESIS/tree/main/5t_ota_example_run/ota_models/__pycache__">Directory guide</a></article>
+        </div>
+      </section>
+
+      <section class="section" id="stages">
+        <div class="section-heading">
+          <p class="eyebrow">How to inspect stage N</p>
+          <h2>Read one horizontal slice across the run</h2>
+          <p>Use the same stage number across directories. This reconstructs exactly what the framework proposed, predicted, simulated, and fed back.</p>
+        </div>
+        <ol class="stage-reader">
+          <li><strong>Prompt:</strong> open <code>prompts/prompt_stageN.txt</code> to see the information given to the model.</li>
+          <li><strong>Proposal:</strong> inspect <code>llm_outputs/llm_output_stageN.json</code> for topology mapping and equations.</li>
+          <li><strong>Executable model:</strong> read <code>ota_models/ota_model_stageN.py</code>, compiled from that JSON.</li>
+          <li><strong>LUT sizing:</strong> inspect <code>ota_model_performance/ota_model_estimation_stageN.1.json</code> and the parameters it selected.</li>
+          <li><strong>Simulator truth:</strong> compare <code>spice_performance/spice_estimation_stageN.json</code> with the same row in <code>design_sweep_log.csv</code>.</li>
+          <li><strong>Equation verification:</strong> compare the SPICE report with <code>ota_model_estimation_stageN.2.json</code>; mismatch appears in the next prompt.</li>
+        </ol>
+
+        <div class="result-panel">
+          <div>
+            <p class="eyebrow">Stage 9 closure snapshot</p>
+            <h3>The final equations track the main HSPICE measurements closely.</h3>
+            <p>The table is illustrative, not a replacement for the JSON reports. Percent differences use the HSPICE magnitude as the reference.</p>
+          </div>
+          <div class="comparison-table" role="table" aria-label="Stage 9 model and HSPICE comparison">
+            <div class="table-head">Metric</div><div class="table-head">Model .2</div><div class="table-head">HSPICE</div><div class="table-head">Difference</div>
+            <div>DC gain</div><div>19.930 dB</div><div>20.226 dB</div><div>1.46%</div>
+            <div>UGB</div><div>20.452 MHz</div><div>20.144 MHz</div><div>1.53%</div>
+            <div>Phase margin</div><div>95.439°</div><div>95.433°</div><div>0.01%</div>
+            <div>CMRR</div><div>42.187 dB</div><div>43.546 dB</div><div>3.12%</div>
+            <div>Positive slew</div><div>12.463 V/µs</div><div>12.374 V/µs</div><div>0.72%</div>
+          </div>
+          <p class="callout"><strong>Measurement caveat:</strong> stage 9 records HSPICE gain margin as <code>FAILED</code>. Treat that field as unavailable and inspect raw simulator diagnostics before drawing a conclusion from it.</p>
+        </div>
+      </section>
+
+      <section class="section" id="reproduce">
+        <div class="section-heading">
+          <p class="eyebrow">Reproduce and extend</p>
+          <h2>Use the snapshot as a reference, not as the live workspace</h2>
+        </div>
+        <div class="command-block"><pre><code># The configured driver creates and owns 5t_ota/
+bash llm_aided_modelling.sh
+
+# Compare the fresh workspace with the preserved example
+diff -ru 5t_ota_example_run 5t_ota</code></pre></div>
+        <p class="section-note">A byte-for-byte match is not expected: LLM responses, timestamps, simulator products, and optimization results can vary. Compare schemas, stage lineage, convergence behavior, and performance trends. A real run also requires API configuration, HSPICE on <code>PATH</code>, and accessible foundry models.</p>
+      </section>
+    </main>
+
+    <footer class="footer"><p>NEMESIS 5T OTA worked example.</p><a href="index.html">Return to framework documentation</a></footer>
+    <script src="script.js"></script>
+  </body>
+</html>
