@@ -33,6 +33,48 @@ def read_json_to_dict(filepath):
 # 1. CONFIGURATION & DEFAULTS
 # ==============================================================================
 DEFAULT_SPECS_FILE = "specs_5T.json"
+DEFAULT_NMOS_LUT_FILE = "Testbenches/nmos_lut.csv"
+DEFAULT_PMOS_LUT_FILE = "Testbenches/pmos_lut.csv"
+REQUIRED_LUT_COLUMNS = ("L", "gmid", "id", "W")
+
+
+def validate_lut_csv(csv_path):
+    """Validate the LUT fields consumed by the sizing flow without caching them."""
+    try:
+        data = pd.read_csv(csv_path)
+    except (OSError, UnicodeError, pd.errors.ParserError, pd.errors.EmptyDataError) as error:
+        raise ValueError(f"cannot read LUT CSV '{csv_path}': {error}") from error
+
+    if data.empty:
+        raise ValueError(f"LUT CSV '{csv_path}' contains no data rows")
+
+    missing_columns = [column for column in REQUIRED_LUT_COLUMNS if column not in data.columns]
+    if missing_columns:
+        missing = ", ".join(missing_columns)
+        raise ValueError(f"LUT CSV '{csv_path}' is missing required columns: {missing}")
+
+    numeric_data = data.loc[:, list(REQUIRED_LUT_COLUMNS)].apply(pd.to_numeric, errors="coerce")
+    finite_values = np.isfinite(numeric_data.to_numpy(dtype=float))
+    if not finite_values.all():
+        invalid_columns = [
+            column
+            for column, column_is_finite in zip(REQUIRED_LUT_COLUMNS, finite_values.all(axis=0))
+            if not column_is_finite
+        ]
+        invalid = ", ".join(invalid_columns)
+        raise ValueError(
+            f"LUT CSV '{csv_path}' requires finite numeric values in columns: {invalid}"
+        )
+
+    return len(data)
+
+
+def validate_lut_files(nmos_path, pmos_path):
+    """Validate both technology LUT inputs and report their row counts."""
+    for device_type, csv_path in (("NMOS", nmos_path), ("PMOS", pmos_path)):
+        row_count = validate_lut_csv(csv_path)
+        print(f"Validated {device_type} LUT: {csv_path} ({row_count} rows)")
+
 
 class LUTLoader:
     def __init__(self, nmos_path, pmos_path, use_cache=True):
@@ -296,22 +338,20 @@ def load_performance_model(module_path):
 # 3. MAIN FLOW
 # ==============================================================================
 def run_general_flow(args, verify = False):
-    # --- SETUP ---
-    NMOS_FILE = "Testbenches/nmos_lut.csv"
-    PMOS_FILE = "Testbenches/pmos_lut.csv"
-    
     if not os.path.exists(args.specs):
         print(f"? Error: Specs file '{args.specs}' not found.")
         sys.exit(1)
 
     with open(args.specs, 'r') as f: specs = json.load(f)
 
-    loader = LUTLoader(NMOS_FILE, PMOS_FILE)
-    sizer = CircuitSizer(loader)
-
     #print(f"? Sizing Topology: {specs['meta']['topology_name']}")
-    
-    if verify == False:   
+
+    if verify == False:
+        nmos_lut = getattr(args, "nmos_lut", DEFAULT_NMOS_LUT_FILE)
+        pmos_lut = getattr(args, "pmos_lut", DEFAULT_PMOS_LUT_FILE)
+        loader = LUTLoader(nmos_lut, pmos_lut)
+        sizer = CircuitSizer(loader)
+
         # --- SIZING ---
         # Smart function: Returns Dict (if scalar) or List[Dict] (if sweep)
         #sized_data = sizer.size_topology(specs['devices'])
@@ -427,6 +467,16 @@ if __name__ == "__main__":
     parser.add_argument('--verify', action='store_true', help='Enable verification mode')
     parser.add_argument('--opjson', default='op_results.json', help='Path to the extracted op parameters json')
     parser.add_argument('--optimize', action='store_true', help='Increase gm/id from requested value until LUT row satisfies vds > vdsat + margin')
+    parser.add_argument('--nmos-lut', default=DEFAULT_NMOS_LUT_FILE, help='Path to the user-provided NMOS gm/Id lookup table')
+    parser.add_argument('--pmos-lut', default=DEFAULT_PMOS_LUT_FILE, help='Path to the user-provided PMOS gm/Id lookup table')
+    parser.add_argument('--validate-luts', action='store_true', help='Validate both LUT CSV inputs and exit without running the sizing flow')
     args = parser.parse_args()
-    
-    run_general_flow(args, verify = args.verify)
+
+    if args.validate_luts:
+        try:
+            validate_lut_files(args.nmos_lut, args.pmos_lut)
+        except ValueError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            sys.exit(2)
+    else:
+        run_general_flow(args, verify = args.verify)
