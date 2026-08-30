@@ -27,6 +27,7 @@ The GitHub Pages documentation site is in `docs/`. After pushing the repository,
 - HSPICE available on `PATH`.
 - API credentials/configuration required by `call_codex.py`.
 - Valid foundry model paths referenced by the DUT netlists.
+- Technology-characterized NMOS and PMOS gm/Id lookup-table CSV files.
 
 ## Basic Usage
 
@@ -52,7 +53,23 @@ REASONING="high"
 Run the framework:
 
 ```bash
-bash llm_aided_modelling.sh
+NMOS_LUT_FILE=/path/to/nmos_lut.csv \
+PMOS_LUT_FILE=/path/to/pmos_lut.csv \
+  bash llm_aided_modelling.sh
+```
+
+The LUT files are external technology inputs and are not included in this repository. The driver checks both paths
+before recreating the work directory or making any LLM API calls. If the environment variables are omitted, the
+legacy paths `Testbenches/nmos_lut.csv` and `Testbenches/pmos_lut.csv` are used.
+
+Each CSV must contain at least one data row and the finite numeric columns `L`, `gmid`, `id`, and `W`. Consistent with
+the existing sizing and specification SI convention, `L` and `W` are in metres, `gmid` is in 1/V, and `id` is in
+amperes. Validate the inputs without starting the flow or creating `.pkl` caches with:
+
+```bash
+python3 design_sizer.py --validate-luts \
+  --nmos-lut "/path/to/NMOS LUT.csv" \
+  --pmos-lut "/path/to/PMOS LUT.csv"
 ```
 
 Important: the driver deletes and recreates `WORK_DIR` at the start of each run. Preserve generated artifacts before rerunning with the same work-directory name.

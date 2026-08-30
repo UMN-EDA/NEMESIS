@@ -19,6 +19,8 @@ gmid_agent_prompt="$WORK_DIR/prompts/gmid_agent_prompt_1.txt"
 
 MODEL="gpt-5.5"
 REASONING="high"
+NMOS_LUT_FILE="${NMOS_LUT_FILE:-Testbenches/nmos_lut.csv}"
+PMOS_LUT_FILE="${PMOS_LUT_FILE:-Testbenches/pmos_lut.csv}"
 
 UPDATED_DESIGN_PARAMS="$WORK_DIR/testbenches/design_params_updated.sp"
 OP_LIS="$WORK_DIR/testbenches/spice_run/run_op.lis"
@@ -48,6 +50,19 @@ SCRIPT_GEN_DESIGN_PARAMS="generate_design_params.py"
 SCRIPT_EXTRACT_OP_PARAMS="extract_op.py"
 SCRIPT_REPAIR_MODEL="repair_model.py"
 SCRIPT_VECTORIZATION_AGENT="vectorization_agent.py"
+SCRIPT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# The technology-characterized gm/Id LUTs are external inputs. Validate them
+# before deleting an existing work directory or making any LLM API calls.
+python3 "$SCRIPT_ROOT/$SCRIPT_SIZER" \
+    --validate-luts \
+    --nmos-lut "$NMOS_LUT_FILE" \
+    --pmos-lut "$PMOS_LUT_FILE"
+lut_validation_rc=$?
+if [ "$lut_validation_rc" -ne 0 ]; then
+    echo "Set NMOS_LUT_FILE and PMOS_LUT_FILE to valid user-provided LUT CSV files." >&2
+    exit "$lut_validation_rc"
+fi
 
 # NEW: Cleanup existing WORK_DIR to ensure no cross-contamination from old runs
 echo ">>[1] OPERATION: check if WORK_DIR exists: [ -d \"$WORK_DIR\" ]"
@@ -225,6 +240,8 @@ do
             --model "$file_model_py" \
             --specs "$SPEC_FILE_TEST" \
             --out "$file_sized_params_gmid" \
+            --nmos-lut "$NMOS_LUT_FILE" \
+            --pmos-lut "$PMOS_LUT_FILE" \
             --optimize 2>&1)
 
         sizer_rc=$?
